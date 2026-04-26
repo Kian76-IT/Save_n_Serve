@@ -1,93 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:save_n_serve/models/food_item.dart';
+import 'package:save_n_serve/theme.dart';
 
 class DonationCard extends StatelessWidget {
-  final String organizer;
-  final String title;
-  final String buttonText;
-  final String? buttonText2; // (opsional)
+  final FoodItem food; // Mengambil data langsung dari model
 
-  const DonationCard({
-    super.key,
-    required this.organizer,
-    required this.title,
-    required this.buttonText,
-    this.buttonText2,
-  });
+  const DonationCard({super.key, required this.food});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              organizer,
-              style: const TextStyle(
-                fontSize: 14, 
-                color: Colors.grey, 
-                fontWeight: FontWeight.bold
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))
+        ],
+      ),
+      child: Column(
+        children: [
+          // Bagian Atas: Gambar & Rating
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                child: Image.asset(food.imagePath, height: 180, width: double.infinity, fit: BoxFit.cover),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            
-            // Placeholder Gambar (Kotak Abu-abu)
-            Container(
-              height: 150,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.image, size: 50, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            
-            // Barisan Tombol
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {}, // Belum ada aksi klik
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(buttonText),
+              Positioned(
+                top: 12, right: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), borderRadius: BorderRadius.circular(20)),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.orange, size: 16),
+                      Text(" ${food.rating}", style: const TextStyle(color: Colors.white, fontSize: 12)),
+                    ],
                   ),
                 ),
-                // Jika tombol kedua ada, tampilkan di sebelahnya
-                if (buttonText2 != null) ...[
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {}, // Belum ada aksi klik
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(buttonText2!),
+              ),
+            ],
+          ),
+          // Bagian Bawah: Info
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(food.name, style: AppTextStyle.regularPoppins12.copyWith(fontWeight: FontWeight.bold)),
+                Text("${food.distance} • ${food.location}", style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text("\$${food.discountedPrice} ", style: TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text("\$${food.originalPrice}", style: const TextStyle(color: Colors.grey, decoration: TextDecoration.lineThrough, fontSize: 14)),
+                      ],
                     ),
-                  ),
-                ]
+                    CircleAvatar(
+                      backgroundColor: primary,
+                      radius: 18,
+                      child: const Icon(Icons.add, color: Colors.white),
+                    )
+                  ],
+                ),
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }

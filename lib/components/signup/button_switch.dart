@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:save_n_serve/theme.dart';
+import 'package:save_n_serve/pages/auth/signin.dart';
 
 class ButtonSwitch extends StatelessWidget {
   const ButtonSwitch({super.key});
@@ -19,6 +20,26 @@ class ButtonSwitch extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context, 
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 500),
+                      pageBuilder: (context, animation, secondaryAnimation) => const SignIn(),
+                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                        const curve = Curves.easeInOut;
+                        var curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
+
+                        return FadeTransition(
+                          opacity: curvedAnimation,
+                          child: child,
+                          );
+                      }
+                    )
+                      );
+                },
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
@@ -30,13 +51,14 @@ class ButtonSwitch extends StatelessWidget {
                 ),
               ),
             ),
+          ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: Color(0xFFFC87700), width: 1.5)
+                  border: Border.all(color: const Color(0xFFC87700), width: 1.5)
                 ),
                 child: Text(
                   'Sign Up',

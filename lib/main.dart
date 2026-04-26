@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:save_n_serve/pages/activity.dart';
-import 'package:save_n_serve/pages/home_page.dart';
 
-import 'package:save_n_serve/pages/signin.dart';
-import 'package:save_n_serve/pages/signup.dart';
+import 'package:save_n_serve/pages/auth/signup.dart';
 
 void main() {
   runApp(const MainApp());
@@ -17,7 +14,7 @@ class MainApp extends StatelessWidget {
     return const MaterialApp(
       title: "Save n Serve",
       debugShowCheckedModeBanner: false,
-      home: MainPageBene(),
+      home: SignUp(),
     );
   }
 }
