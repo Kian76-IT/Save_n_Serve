@@ -11,7 +11,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  // Nama variabelnya aku samain: _selectedCategory
   int _selectedCategory = 0; 
   int _currentBanner = 0;
   late PageController _bannerController;
