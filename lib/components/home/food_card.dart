@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:save_n_serve/models/food_item.dart';
+import '../../models/food_item.dart';
 
 class FoodCard extends StatelessWidget {
-  final FoodItem item; // Data diambil dari sini
+  final FoodItem item;
 
   const FoodCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Area Gambar ──
+          // --- BAGIAN GAMBAR ---
           Stack(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: Image.asset(
                   item.imagePath,
                   height: 180,
@@ -36,117 +38,119 @@ class FoodCard extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-              // Rating Badge
+              // Bintang Rating (Pojok Kanan Atas)
               Positioned(
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF212121).withOpacity(0.85),
+                    color: Colors.black.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFFFD700), size: 14),
-                      const SizedBox(width: 3),
+                      const Icon(Icons.star, color: Colors.yellow, size: 16),
+                      const SizedBox(width: 4),
                       Text(
                         item.rating.toString(),
                         style: const TextStyle(
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              // Tombol Plus
+              // Tombol Tambah (Di atas gambar, pojok kanan bawah)
               Positioned(
                 bottom: 12,
                 right: 12,
                 child: Container(
-                  width: 32,
-                  height: 32,
                   decoration: const BoxDecoration(
                     color: Color(0xFF4CAF50),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 20),
+                  padding: const EdgeInsets.all(6),
+                  child: const Icon(Icons.add, color: Colors.white, size: 28),
                 ),
               ),
             ],
           ),
 
-          // ── Baris Informasi ──
+          // --- BAGIAN DETAIL (Teks) ---
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                // Nama & Lokasi
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.name,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF212121),
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        item.location,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9E9E9E),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Jarak + Harga
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                // Baris 1: Nama & Jarak
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     Row(
                       children: [
-                        const Icon(Icons.place_outlined, size: 12, color: Color(0xFF9E9E9E)),
-                        const SizedBox(width: 2),
+                        const Icon(
+                          Icons.near_me_outlined,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
                         Text(
-                          '${item.distance}km',
+                          "${item.distance}km",
                           style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF9E9E9E),
+                            color: Colors.grey,
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                // Baris 2: Lokasi & Harga
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.location,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 15,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                     Row(
                       children: [
                         Text(
-                          '\$${item.originalPrice.toStringAsFixed(2)}',
+                          "\$${item.originalPrice}",
                           style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFFFF5252),
                             decoration: TextDecoration.lineThrough,
-                            decorationColor: Color(0xFFFF5252),
+                            color: Colors.red,
+                            fontSize: 14,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 10),
                         Text(
-                          '\$${item.discountedPrice.toStringAsFixed(2)}',
+                          "\$${item.discountedPrice}",
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF212121),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'models/food_item.dart'; 
-import 'components/home/food_card.dart';
+import '../components/home/giver_body.dart';
+import '../components/home/beneficiary_body.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -11,8 +11,8 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  int _selectedCategory = 0; 
   int _currentBanner = 0;
+  String _selectedRole = 'Beneficiary';
   late PageController _bannerController;
   Timer? _bannerTimer;
 
@@ -20,14 +20,6 @@ class _HomeTabState extends State<HomeTab> {
     _BannerData(imagePath: 'assets/images/Slide1.png'),
     _BannerData(imagePath: 'assets/images/Slide2.png'),
     _BannerData(imagePath: 'assets/images/Slide3.png'),
-  ];
-
-  final List<String> _categories = ['All', 'Heavy Meals', 'Beverages', 'Vegetables'];
-  final List<String> _categoryEmojis = [
-    'assets/images/CategoryAll.png',
-    'assets/images/CategoryHeavy.png',
-    'assets/images/CategoryBeverages.png',
-    'assets/images/CategoryVegetables.png'
   ];
 
   @override
@@ -61,42 +53,25 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildMovingBanner(),
-                    const SizedBox(height: 16),
-                    _buildSearchBar(),
-                    const SizedBox(height: 20),
-                    _buildCategoryTabs(),
-                    const SizedBox(height: 20),
-                    _buildRecommendedHeader(),
-                    const SizedBox(height: 12),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              _buildMovingBanner(),
+              const SizedBox(height: 16),
 
-                    // Mapping Food Cards yang sudah dibenerin:
-                    ...recommendedItems.where((item) {
-                      // Pakai _selectedCategory (tanpa Index)
-                      final selectedCategoryName = _categories[_selectedCategory];
-                      return selectedCategoryName == 'All' || item.category == selectedCategoryName;
-                    }).map((item) => FoodCard(item: item)),
-
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-            ),
-          ],
+              // SWITCHER LOGIC
+              _selectedRole == 'Beneficiary'
+                  ? const BeneficiaryBody()
+                  : const GiverBody(),
+            ],
+          ),
         ),
       ),
     );
   }
 
   // ─────────────────────────────────────────────
-  // WIDGET HELPER (Banner, Search, Tabs, Header)
+  // WIDGET HELPERS
   // ─────────────────────────────────────────────
 
   Widget _buildMovingBanner() {
@@ -108,23 +83,21 @@ class _HomeTabState extends State<HomeTab> {
             controller: _bannerController,
             itemCount: _banners.length,
             onPageChanged: (i) => setState(() => _currentBanner = i),
-            itemBuilder: (context, index) => _BannerSlide(banner: _banners[index]),
+            itemBuilder: (context, index) =>
+                _BannerSlide(banner: _banners[index]),
           ),
-          // Role chip & Bell (tetap seperti kode kamu sebelumnya)
+          Positioned(top: 12, left: 16, child: _buildRoleChip()),
+          Positioned(top: 12, right: 16, child: _buildNotificationBell()),
           Positioned(
-            top: 12, left: 16,
-            child: _buildRoleChip(),
-          ),
-          Positioned(
-            top: 12, right: 16,
-            child: _buildNotificationBell(),
-          ),
-          // Indicators
-          Positioned(
-            bottom: 12, left: 0, right: 0,
+            bottom: 12,
+            left: 0,
+            right: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_banners.length, (i) => _buildDotIndicator(i)),
+              children: List.generate(
+                _banners.length,
+                (i) => _buildDotIndicator(i),
+              ),
             ),
           ),
         ],
@@ -134,27 +107,52 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget _buildRoleChip() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white30),
       ),
-      child: const Row(
-        children: [
-          Icon(Icons.person, size: 14, color: Colors.white),
-          SizedBox(width: 6),
-          Text('Role Selected: Beneficiary', style: TextStyle(color: Colors.white, fontSize: 12)),
-        ],
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedRole,
+          dropdownColor: Colors.black87,
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Colors.white,
+            size: 18,
+          ),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedRole = newValue!;
+            });
+          },
+          items: ['Beneficiary', 'Giver'].map((String value) {
+            return DropdownMenuItem<String>(value: value, child: Text(value));
+          }).toList(),
+        ),
       ),
     );
   }
 
   Widget _buildNotificationBell() {
     return Container(
-      width: 36, height: 36,
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), shape: BoxShape.circle),
-      child: const Icon(Icons.notifications_none, color: Colors.white, size: 20),
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.notifications_none,
+        color: Colors.white,
+        size: 20,
+      ),
     );
   }
 
@@ -170,80 +168,9 @@ class _HomeTabState extends State<HomeTab> {
       ),
     );
   }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
-        child: const Row(
-          children: [
-            SizedBox(width: 16),
-            Icon(Icons.search, color: Colors.grey, size: 22),
-            SizedBox(width: 10),
-            Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey, fontSize: 14)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryTabs() {
-    return SizedBox(
-      height: 80,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _categories.length,
-        itemBuilder: (context, i) {
-          final selected = i == _selectedCategory;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = i),
-            child: Container(
-              width: 76,
-              margin: const EdgeInsets.only(right: 8),
-              child: Column(
-                children: [
-                  Container(
-                    width: 52, height: 52,
-                    decoration: BoxDecoration(
-                      color: selected ? const Color(0xFFE8F5E9) : const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(14),
-                      border: selected ? Border.all(color: const Color(0xFF4CAF50), width: 2) : null,
-                    ),
-                    child: Center(child: Image.asset(_categoryEmojis[i], width: 28, height: 28)),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(_categories[i], style: TextStyle(fontSize: 11, fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildRecommendedHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('Recommended', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          Text('All', style: TextStyle(color: Colors.green[600], fontWeight: FontWeight.bold)),
-        ],
-      ),
-    );
-  }
 }
 
-// ── BANNER MODELS ──
+// ── BANNER CLASSES ──
 class _BannerData {
   final String imagePath;
   const _BannerData({required this.imagePath});

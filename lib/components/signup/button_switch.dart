@@ -8,7 +8,7 @@ class ButtonSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 60,),
+      padding: const EdgeInsets.symmetric(horizontal: 60),
       child: Container(
         // clipBehavior: Clip.antiAlias,
         padding: const EdgeInsets.all(0),
@@ -24,46 +24,56 @@ class ButtonSwitch extends StatelessWidget {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   Navigator.pushReplacement(
-                    context, 
+                    context,
                     PageRouteBuilder(
                       transitionDuration: const Duration(milliseconds: 500),
-                      pageBuilder: (context, animation, secondaryAnimation) => const SignIn(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        const curve = Curves.easeInOut;
-                        var curvedAnimation = CurvedAnimation(parent: animation, curve: curve);
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const SignIn(),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            const curve = Curves.easeInOut;
+                            var curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: curve,
+                            );
 
-                        return FadeTransition(
-                          opacity: curvedAnimation,
-                          child: child,
-                          );
-                      }
-                    )
-                      );
+                            return FadeTransition(
+                              opacity: curvedAnimation,
+                              child: child,
+                            );
+                          },
+                    ),
+                  );
                 },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  "Login",
-                  textAlign: TextAlign.center,
-                  style: AppTextStyle.regularPoppins20.copyWith(
-                    color: primary,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    "Login",
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.regularPoppins20.copyWith(
+                      color: primary,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
                   color: accent,
                   borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: const Color(0xFFC87700), width: 1.5)
+                  border: Border.all(
+                    color: const Color(0xFFC87700),
+                    width: 1.5,
+                  ),
                 ),
                 child: Text(
                   'Sign Up',
                   textAlign: TextAlign.center,
-                  style: AppTextStyle.regularPoppins20.copyWith(color: background),
+                  style: AppTextStyle.regularPoppins20.copyWith(
+                    color: background,
+                  ),
                 ),
               ),
             ),

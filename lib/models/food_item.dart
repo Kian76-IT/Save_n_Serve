@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 class FoodItem {
   final String name;
   final String location;
-  final String category; 
+  final String category;
   final double rating;
   final double originalPrice;
   final double discountedPrice;
   final double distance;
+  final String duration;
   final Color imageColor;
   final String imagePath;
 
@@ -19,11 +20,11 @@ class FoodItem {
     required this.originalPrice,
     required this.discountedPrice,
     required this.distance,
+    required this.duration,
     required this.imageColor,
     required this.imagePath,
   });
 }
-
 
 const List<FoodItem> recommendedItems = [
   FoodItem(
@@ -34,6 +35,7 @@ const List<FoodItem> recommendedItems = [
     originalPrice: 3.99,
     discountedPrice: 1.67,
     distance: 0.5,
+    duration: '15 mins',
     imageColor: Color(0xFFD4A373),
     imagePath: 'assets/images/GambarProduk1.png',
   ),
@@ -45,6 +47,7 @@ const List<FoodItem> recommendedItems = [
     originalPrice: 5.50,
     discountedPrice: 2.20,
     distance: 1.2,
+    duration: '15 mins',
     imageColor: Color(0xFFE07A5F),
     imagePath: 'assets/images/GambarProduk2.png',
   ),
@@ -56,6 +59,7 @@ const List<FoodItem> recommendedItems = [
     originalPrice: 2.50,
     discountedPrice: 1.00,
     distance: 0.8,
+    duration: '15 mins',
     imageColor: Color(0xFF81B29A),
     imagePath: 'assets/images/GambarProduk3.png',
   ),

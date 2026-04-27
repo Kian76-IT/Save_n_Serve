@@ -11,7 +11,7 @@ class Header extends StatelessWidget {
       height: 230,
       color: primary,
       child: Center(
-        child: Image.asset('assets/logo/Logo_Save_n_Serve.png', height:500),
+        child: Image.asset('assets/logo/Logo_Save_n_Serve.png', height: 500),
       ),
     );
   }

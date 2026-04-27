@@ -16,18 +16,20 @@ class ButtonLogin extends StatelessWidget {
             context,
             PageRouteBuilder(
               transitionDuration: const Duration(milliseconds: 400),
-              pageBuilder: (context, animation, secondaryAnimation) => MainPageBene(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                var curvedAnimation = CurvedAnimation(
-                  parent: animation,
-                  curve: Curves.easeInOut,
-                );
+              pageBuilder: (context, animation, secondaryAnimation) =>
+                  MainPageBene(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    var curvedAnimation = CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeInOut,
+                    );
 
-                return FadeTransition(
-                  opacity: curvedAnimation,
-                  child: child,
-                );
-              },
+                    return FadeTransition(
+                      opacity: curvedAnimation,
+                      child: child,
+                    );
+                  },
             ),
           );
         },

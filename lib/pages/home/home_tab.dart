@@ -31,8 +31,8 @@ class _MainPageBeneState extends State<MainPageBene> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_selectedIndex], 
-      
+      body: _pages[_selectedIndex],
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
@@ -40,10 +40,7 @@ class _MainPageBeneState extends State<MainPageBene> {
         selectedItemColor: primary,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Watchlist',
@@ -52,10 +49,7 @@ class _MainPageBeneState extends State<MainPageBene> {
             icon: Icon(Icons.receipt_long),
             label: 'Activity',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

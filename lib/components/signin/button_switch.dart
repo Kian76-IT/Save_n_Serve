@@ -25,7 +25,7 @@ class ButtonSwitch extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: primary,
                   borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: text, width: 1.5)
+                  border: Border.all(color: text, width: 1.5),
                 ),
                 child: Text(
                   "Login",
@@ -45,18 +45,20 @@ class ButtonSwitch extends StatelessWidget {
                     context,
                     PageRouteBuilder(
                       transitionDuration: const Duration(milliseconds: 400),
-                      pageBuilder: (context, animation, secondaryAnimation) => const SignUp(),
-                      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                        var curvedAnimation = CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeInOut,
-                        );
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const SignUp(),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            var curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeInOut,
+                            );
 
-                        return FadeTransition(
-                          opacity: curvedAnimation,
-                          child: child,
-                        );
-                      },
+                            return FadeTransition(
+                              opacity: curvedAnimation,
+                              child: child,
+                            );
+                          },
                     ),
                   );
                 },
@@ -65,7 +67,9 @@ class ButtonSwitch extends StatelessWidget {
                   child: Text(
                     'Sign Up',
                     textAlign: TextAlign.center,
-                    style: AppTextStyle.regularPoppins20.copyWith(color: accent),
+                    style: AppTextStyle.regularPoppins20.copyWith(
+                      color: accent,
+                    ),
                   ),
                 ),
               ),

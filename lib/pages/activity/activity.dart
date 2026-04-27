@@ -18,12 +18,8 @@ class Activity extends StatelessWidget {
             Header(),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ActivityList(),
-                  ],
-                ),
-              )
+                child: Column(children: [ActivityList()]),
+              ),
             ),
           ],
         ),
