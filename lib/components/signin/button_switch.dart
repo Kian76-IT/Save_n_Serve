@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:save_n_serve/pages/auth/signup.dart';
 import 'package:save_n_serve/theme.dart';
 
 class ButtonSwitch extends StatelessWidget {
@@ -24,7 +25,7 @@ class ButtonSwitch extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: primary,
                   borderRadius: BorderRadius.circular(50),
-                  border: Border.all(color: text, width: 1.5)
+                  border: Border.all(color: text, width: 1.5),
                 ),
                 child: Text(
                   "Login",
@@ -35,13 +36,41 @@ class ButtonSwitch extends StatelessWidget {
                 ),
               ),
             ),
+
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  'Sign Up',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyle.regularPoppins20.copyWith(color: accent),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.pushReplacement(
+                    context,
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 400),
+                      pageBuilder: (context, animation, secondaryAnimation) =>
+                          const SignUp(),
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            var curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: Curves.easeInOut,
+                            );
+
+                            return FadeTransition(
+                              opacity: curvedAnimation,
+                              child: child,
+                            );
+                          },
+                    ),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'Sign Up',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.regularPoppins20.copyWith(
+                      color: accent,
+                    ),
+                  ),
                 ),
               ),
             ),

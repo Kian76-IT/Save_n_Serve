@@ -30,17 +30,19 @@ class _ButtonCompanyState extends State<ButtonCompany> {
               suffixIcon: Padding(
                 padding: const EdgeInsets.only(right: 20),
                 child: IconButton(
-                  onPressed: (){
+                  onPressed: () {
                     setState(() {
                       isCompanySelected = !isCompanySelected;
-                      });
-                    },
-                    icon: Icon(
-                      isCompanySelected ? Icons.check_circle : Icons.radio_button_unchecked,
-                      color: isCompanySelected ? Colors.green : Colors.grey,
-                      size: 35,
+                    });
+                  },
+                  icon: Icon(
+                    isCompanySelected
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                    color: isCompanySelected ? Colors.green : Colors.grey,
+                    size: 35,
                   ),
-                ), 
+                ),
               ),
               contentPadding: EdgeInsets.symmetric(
                 horizontal: 20,

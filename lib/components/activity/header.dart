@@ -19,7 +19,7 @@ class Header extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const Divider(thickness: 3, color: Color(0xFFF2E7D32)),
+        const Divider(thickness: 3, color: Color(0xfff2e7d32)),
 
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),

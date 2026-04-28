@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:save_n_serve/pages/activity.dart';
 
-import 'package:save_n_serve/pages/signin.dart';
-import 'package:save_n_serve/pages/signup.dart';
+import 'package:save_n_serve/pages/auth/signup.dart';
 
 void main() {
   runApp(const MainApp());

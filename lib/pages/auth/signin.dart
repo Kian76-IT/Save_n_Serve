@@ -40,7 +40,7 @@ class SignIn extends StatelessWidget {
                     // username or email
                     const SizedBox(height: 20),
                     ButtonUsername(),
-                    
+
                     // Text Field Password
                     const SizedBox(height: 20),
                     ButtonPassword(),
@@ -57,7 +57,7 @@ class SignIn extends StatelessWidget {
                     const SizedBox(height: 14),
                     SocialLogin(),
                     // Teks Terms of Service
-                    const SizedBox(height: 100,),
+                    const SizedBox(height: 100),
                     TextTerms(),
                   ],
                 ),
