@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../models/food_item.dart'; // Pastikan path ini bener ke model lo
-import 'food_card.dart';
+import '../../models/food_item.dart';
+import '../../controllers/home_controller.dart'; 
+import 'food_card.dart'; 
 
 class BeneficiaryBody extends StatefulWidget {
   const BeneficiaryBody({super.key});
@@ -10,37 +11,32 @@ class BeneficiaryBody extends StatefulWidget {
 }
 
 class _BeneficiaryBodyState extends State<BeneficiaryBody> {
-  // 1. PINDAHKAN STATE KATEGORI KE SINI
-  int _selectedCategory = 0;
+  final HomeController _controller = HomeController();
 
-  final List<String> _categories = [
-    'All',
-    'Heavy Meals',
-    'Beverages',
-    'Vegetables',
-  ];
-  final List<String> _categoryEmojis = [
-    'assets/images/CategoryAll.png',
-    'assets/images/CategoryHeavy.png',
-    'assets/images/CategoryBeverages.png',
-    'assets/images/CategoryVegetables.png',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _controller.fetchFoods(); 
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildSearchBar(),
-        const SizedBox(height: 24),
-        _buildCategoryTabs(),
-        const SizedBox(height: 24),
-        _buildRecommendedHeader(),
-        _buildFoodList(),
-      ],
+    return ListenableBuilder(
+      listenable: _controller,
+      builder: (context, child) {
+        return Column(
+          children: [
+            _buildSearchBar(),
+            const SizedBox(height: 24),
+            _buildCategoryTabs(),
+            const SizedBox(height: 24),
+            _buildRecommendedHeader(),
+            _buildFoodList(),
+          ],
+        );
+      }
     );
   }
-
-  // --- WIDGET HELPER IMPLEMENTATION ---
 
   Widget _buildSearchBar() {
     return Padding(
@@ -51,11 +47,7 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))
           ],
         ),
         child: const Row(
@@ -63,10 +55,7 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
             SizedBox(width: 20),
             Icon(Icons.search, color: Colors.grey, size: 22),
             SizedBox(width: 12),
-            Text(
-              'Search sushi, rolls...',
-              style: TextStyle(color: Colors.grey, fontSize: 15),
-            ),
+            Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey, fontSize: 15)),
           ],
         ),
       ),
@@ -79,44 +68,33 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _categories.length,
+        itemCount: _controller.categories.length,
         itemBuilder: (context, i) {
-          final isSelected = i == _selectedCategory;
+          final isSelected = i == _controller.selectedCategory;
           return GestureDetector(
-            onTap: () => setState(() => _selectedCategory = i),
+            onTap: () => _controller.changeCategory(i),
             child: Container(
               width: 80,
               margin: const EdgeInsets.only(right: 12),
               child: Column(
                 children: [
                   Container(
-                    width: 55,
-                    height: 55,
+                    width: 55, height: 55,
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFFE8F5E9)
-                          : const Color(0xFFF5F5F5),
+                      color: isSelected ? const Color(0xFFE8F5E9) : const Color(0xFFF5F5F5),
                       borderRadius: BorderRadius.circular(15),
-                      border: isSelected
-                          ? Border.all(color: const Color(0xFF4CAF50), width: 2)
-                          : null,
+                      border: isSelected ? Border.all(color: const Color(0xFF4CAF50), width: 2) : null,
                     ),
                     child: Center(
-                      child: Image.asset(
-                        _categoryEmojis[i],
-                        width: 30,
-                        height: 30,
-                      ),
+                      child: Image.asset(_controller.categoryEmojis[i], width: 30, height: 30),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    _categories[i],
+                    _controller.categories[i],
                     style: TextStyle(
                       fontSize: 11,
-                      fontWeight: isSelected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       color: isSelected ? Colors.black : Colors.grey,
                     ),
                   ),
@@ -135,28 +113,29 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Recommended',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            'See All',
-            style: TextStyle(
-              color: Colors.green[700],
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          const Text('Recommended', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text('See All', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
   Widget _buildFoodList() {
-    // FILTER LOGIC: Ambil data dari recommendedItems (file model)
-    final filteredFoods = recommendedItems.where((food) {
-      if (_selectedCategory == 0) return true; // 'All'
-      return food.category == _categories[_selectedCategory];
-    }).toList();
+    if (_controller.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(child: CircularProgressIndicator(color: Colors.green)),
+      );
+    }
+
+    final filteredFoods = _controller.getFilteredFoods();
+
+    if (filteredFoods.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 40),
+        child: Center(child: Text('No food items found.', style: TextStyle(color: Colors.grey))),
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
