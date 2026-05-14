@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:save_n_serve/splash_screen.dart';
 import 'package:save_n_serve/pages/auth/signup.dart';
 
 void main() {
@@ -11,10 +11,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: "Save n Serve",
       debugShowCheckedModeBanner: false,
-      home: SignUp(),
+      home: SplashScreen(),
     );
   }
-}
+} 
