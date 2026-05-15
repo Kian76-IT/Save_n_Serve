@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:save_n_serve/pages/activity/giver_activity_page.dart';
 
+import 'package:save_n_serve/splash_screen.dart';
 import 'package:save_n_serve/pages/auth/signup.dart';
 
 void main() {
@@ -21,6 +22,7 @@ class MainApp extends StatelessWidget {
       },
 
       home: SignUp(),
+      home: SplashScreen(),
     );
   }
-}
+} 
