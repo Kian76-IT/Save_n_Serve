@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:save_n_serve/pages/activity/giver_activity_page.dart';
+
 import 'package:save_n_serve/splash_screen.dart';
 import 'package:save_n_serve/pages/auth/signup.dart';
 
@@ -14,6 +16,12 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: "Save n Serve",
       debugShowCheckedModeBanner: false,
+
+      routes: {
+        '/giver-activity': (_) => const GiverActivityPage(),
+      },
+
+      home: SignUp(),
       home: SplashScreen(),
     );
   }
