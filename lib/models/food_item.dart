@@ -12,7 +12,9 @@ class FoodItem {
   final Color imageColor;
   final String imagePath;
 
-  const FoodItem({
+  int quantity;
+
+  FoodItem({
     required this.name,
     required this.location,
     required this.category,
@@ -23,10 +25,11 @@ class FoodItem {
     required this.duration,
     required this.imageColor,
     required this.imagePath,
+    this.quantity = 0
   });
 }
 
-const List<FoodItem> recommendedItems = [
+ List<FoodItem> recommendedItems = [
   FoodItem(
     name: 'Burger King',
     location: 'Tanah Abang Square',
