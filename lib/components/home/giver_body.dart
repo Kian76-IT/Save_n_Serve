@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../pages/home/donation_form_page.dart';
 
 class GiverBody extends StatelessWidget {
   const GiverBody({super.key});
@@ -29,11 +30,12 @@ class GiverBody extends StatelessWidget {
             childAspectRatio: 0.85,
             children: [
               _buildDonateCard(
+                context,
                 "Heavy Meals",
                 "assets/images/fotoHeavyMeals.png",
               ),
-              _buildDonateCard("Beverages", "assets/images/fotoBeverages.png"),
-              _buildDonateCard("Vegetables", "assets/images/fotoVege.png"),
+              _buildDonateCard(context, "Beverages", "assets/images/fotoBeverages.png"),
+              _buildDonateCard(context, "Vegetables", "assets/images/fotoVege.png"),
             ],
           ),
         ],
@@ -105,7 +107,7 @@ class GiverBody extends StatelessWidget {
     );
   }
 
-  Widget _buildDonateCard(String title, String imagePath) {
+  Widget _buildDonateCard(BuildContext context, String title, String imagePath) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -131,7 +133,14 @@ class GiverBody extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => DonationFormPage(),
+                ),
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
               minimumSize: const Size(80, 30),
