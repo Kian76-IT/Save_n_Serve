@@ -11,6 +11,9 @@ class HomeController extends ChangeNotifier {
   List<FoodItem> _foodList = [];
   List<FoodItem> get foodList => _foodList;
 
+  String _selectedRole = 'Beneficiary';
+  String get selectedRole => _selectedRole;
+
   final List<String> categories = ['All', 'Heavy Meals', 'Beverages', 'Vegetables'];
   final List<String> categoryEmojis = [
     'assets/images/CategoryAll.png',
@@ -19,14 +22,25 @@ class HomeController extends ChangeNotifier {
     'assets/images/CategoryVegetables.png'
   ];
 
+  void setRole(String role) {
+    _selectedRole = role;
+    notifyListeners();
+  }
+
   Future<void> fetchFoods() async {
     _isLoading = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(seconds: 2)); 
-    
-    _foodList = recommendedItems;
+    await Future.delayed(const Duration(seconds: 2));
+
+    _foodList = List.of(recommendedItems);
+    _foodList.sort((a, b) => a.distance.compareTo(b.distance));
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void sortFoodsByDistance() {
+    _foodList.sort((a, b) => a.distance.compareTo(b.distance));
     notifyListeners();
   }
 
@@ -40,3 +54,5 @@ class HomeController extends ChangeNotifier {
     return _foodList.where((food) => food.category == categories[_selectedCategory]).toList();
   }
 }
+
+final homeController = HomeController();

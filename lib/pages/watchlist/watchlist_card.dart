@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:save_n_serve/controllers/food_controller.dart';
 import 'package:save_n_serve/models/food_item.dart';
 import 'package:save_n_serve/pages/home/detail_makanan.dart';
 
@@ -34,7 +35,7 @@ class WatchlistCard extends StatelessWidget {
 
         child: Row(
           children: [
-            // IMAGE
+            // IMAGE + BADGES
             Stack(
               children: [
                 ClipRRect(
@@ -47,25 +48,31 @@ class WatchlistCard extends StatelessWidget {
                   ),
                 ),
 
-                // DELETE
+                // DELETE — sebelumnya tidak bisa diklik, sekarang menghapus item
                 Positioned(
                   left: 6,
                   bottom: 6,
-                  child: Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      size: 14,
-                      color: Colors.white,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      foodController.removeFromWatchlist(food);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Icon(
+                        Icons.delete,
+                        size: 14,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
 
-                // QUANTITY
+                // QUANTITY — sebelumnya hardcoded "1", sekarang dari data
                 Positioned(
                   right: 6,
                   bottom: 6,
@@ -78,9 +85,9 @@ class WatchlistCard extends StatelessWidget {
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      "1",
-                      style: TextStyle(
+                    child: Text(
+                      '${food.quantity}',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -113,7 +120,7 @@ class WatchlistCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
-                            "Reduced",
+                            'Reduced',
                             style: TextStyle(
                               fontSize: 9,
                               color: Colors.orange,
@@ -134,7 +141,7 @@ class WatchlistCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
-                            "6 left",
+                            '6 left',
                             style: TextStyle(
                               fontSize: 9,
                               color: Colors.red,
@@ -147,7 +154,6 @@ class WatchlistCard extends StatelessWidget {
 
                     const SizedBox(height: 6),
 
-                    // TITLE
                     Text(
                       food.name,
                       style: const TextStyle(
@@ -158,19 +164,17 @@ class WatchlistCard extends StatelessWidget {
 
                     const SizedBox(height: 3),
 
-                    // LOCATION
                     Text(
-                      "${food.location}  ${food.distance}km",
+                      '${food.location}  ${food.distance}km',
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                     ),
 
                     const Spacer(),
 
-                    // BOTTOM
                     Row(
                       children: [
                         Text(
-                          "\$${food.originalPrice}",
+                          '\$${food.originalPrice}',
                           style: const TextStyle(
                             color: Colors.red,
                             decoration: TextDecoration.lineThrough,
@@ -182,7 +186,7 @@ class WatchlistCard extends StatelessWidget {
                         const SizedBox(width: 5),
 
                         Text(
-                          "\$${food.discountedPrice}",
+                          '\$${food.discountedPrice}',
                           style: const TextStyle(
                             color: Colors.green,
                             fontSize: 18,
@@ -202,7 +206,7 @@ class WatchlistCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Text(
-                            "Details",
+                            'Details',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 11,

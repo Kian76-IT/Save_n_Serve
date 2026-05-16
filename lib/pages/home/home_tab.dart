@@ -17,10 +17,6 @@ class MainPageBene extends StatefulWidget {
 }
 
 class _MainPageBeneState extends State<MainPageBene> {
-  static _MainPageBeneState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_MainPageBeneState>();
-  }
-
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [

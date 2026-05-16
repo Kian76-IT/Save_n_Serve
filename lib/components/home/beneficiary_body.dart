@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/food_item.dart';
-import '../../controllers/home_controller.dart'; 
+import '../../controllers/home_controller.dart';
 import 'food_card.dart'; 
 
 class BeneficiaryBody extends StatefulWidget {
@@ -11,12 +10,16 @@ class BeneficiaryBody extends StatefulWidget {
 }
 
 class _BeneficiaryBodyState extends State<BeneficiaryBody> {
-  final HomeController _controller = HomeController();
+  // Menggunakan singleton — tidak membuat instance baru setiap rebuild
+  final _controller = homeController;
 
   @override
   void initState() {
     super.initState();
-    _controller.fetchFoods(); 
+    // Guard: hanya fetch jika data belum ada, agar tidak re-fetch saat ganti role
+    if (_controller.foodList.isEmpty) {
+      _controller.fetchFoods();
+    }
   }
 
   @override
@@ -41,22 +44,27 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))
-          ],
+      child: GestureDetector(
+        onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Fitur pencarian dalam pengembangan')),
         ),
-        child: const Row(
-          children: [
-            SizedBox(width: 20),
-            Icon(Icons.search, color: Colors.grey, size: 22),
-            SizedBox(width: 12),
-            Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey, fontSize: 15)),
-          ],
+        child: Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))
+            ],
+          ),
+          child: const Row(
+            children: [
+              SizedBox(width: 20),
+              Icon(Icons.search, color: Colors.grey, size: 22),
+              SizedBox(width: 12),
+              Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey, fontSize: 15)),
+            ],
+          ),
         ),
       ),
     );
@@ -114,7 +122,12 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text('Recommended', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text('See All', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+          GestureDetector(
+            onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fitur lihat semua dalam pengembangan')),
+            ),
+            child: Text('See All', style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+          ),
         ],
       ),
     );

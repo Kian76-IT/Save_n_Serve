@@ -66,4 +66,16 @@ class FoodItem {
     imageColor: Color(0xFF81B29A),
     imagePath: 'assets/images/GambarProduk3.png',
   ),
+  FoodItem(
+    name: 'Fresh Salad',
+    location: 'Kemang Village',
+    category: 'Vegetables',
+    rating: 4.6,
+    originalPrice: 2.00,
+    discountedPrice: 0.80,
+    distance: 1.5,
+    duration: '20 mins',
+    imageColor: Color(0xFF8BC34A),
+    imagePath: 'assets/images/GambarProduk4.png',
+  ),
 ];

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:save_n_serve/pages/auth/signup.dart';
-void main() => runApp(const SavenServeApp());
-
 // ─────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────
@@ -9,21 +7,6 @@ const kGreen     = Color(0xFF2A6B35);
 const kGreenDark = Color(0xFF1E4D25);
 const kOrange    = Color(0xFFF5A31A);
 const kGrey      = Color(0xFF555B52);
-
-// ─────────────────────────────────────────
-// APP
-// ─────────────────────────────────────────
-class SavenServeApp extends StatelessWidget {
-  const SavenServeApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
-    );
-  }
-}
 
 // ─────────────────────────────────────────
 // SPLASH SCREEN — Flow 14

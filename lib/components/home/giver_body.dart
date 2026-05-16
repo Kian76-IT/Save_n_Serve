@@ -11,9 +11,9 @@ class GiverBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSearchBar(),
+          _buildSearchBar(context),
           const SizedBox(height: 20),
-          _buildClaimRewardsCard(),
+          _buildClaimRewardsCard(context),
           const SizedBox(height: 24),
           const Text(
             "Let's Donate!",
@@ -43,7 +43,7 @@ class GiverBody extends StatelessWidget {
     );
   }
 
-  Widget _buildClaimRewardsCard() {
+  Widget _buildClaimRewardsCard(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -91,7 +91,9 @@ class GiverBody extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fitur Redeem dalam pengembangan')),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,
@@ -156,23 +158,28 @@ class GiverBody extends StatelessWidget {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
-        ],
+  Widget _buildSearchBar(BuildContext context) {
+    return GestureDetector(
+      onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Fitur pencarian dalam pengembangan')),
       ),
-      child: const Row(
-        children: [
-          SizedBox(width: 16),
-          Icon(Icons.search, color: Colors.grey),
-          SizedBox(width: 10),
-          Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey)),
-        ],
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+          ],
+        ),
+        child: const Row(
+          children: [
+            SizedBox(width: 16),
+            Icon(Icons.search, color: Colors.grey),
+            SizedBox(width: 10),
+            Text('Search sushi, rolls...', style: TextStyle(color: Colors.grey)),
+          ],
+        ),
       ),
     );
   }
