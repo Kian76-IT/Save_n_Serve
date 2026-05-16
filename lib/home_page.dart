@@ -124,23 +124,7 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
 
-                  Row(
-                    children: [
-                      Text(
-                        "\$${foodController.totalPrice().toStringAsFixed(2)}",
-
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      const Icon(Icons.shopping_bag, color: Colors.white),
-                    ],
-                  ),
+                  const Icon(Icons.shopping_bag, color: Colors.white),
                 ],
               ),
             );
@@ -188,7 +172,7 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white30),
       ),
@@ -222,7 +206,7 @@ class _HomeTabState extends State<HomeTab> {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: const Icon(

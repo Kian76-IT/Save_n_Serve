@@ -15,7 +15,7 @@ class ButtonSwitch extends StatelessWidget {
         decoration: BoxDecoration(
           color: background,
           borderRadius: BorderRadius.circular(50),
-          border: Border.all(color: Colors.black.withOpacity(0.65), width: 1.5),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.65), width: 1.5),
         ),
         child: Row(
           children: [

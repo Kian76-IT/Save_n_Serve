@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:save_n_serve/models/food_item.dart';
+import 'package:save_n_serve/controllers/claim_controller.dart';
+import 'package:save_n_serve/pages/home/home_tab.dart';
 
 class DetailMakananPage extends StatelessWidget {
   final FoodItem food;
@@ -138,25 +140,20 @@ class DetailMakananPage extends StatelessWidget {
 
                             const SizedBox(height: 4),
 
-                            Row(
-                              children: [
-                                Text(
-                                  '\$${food.originalPrice}',
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    decoration: TextDecoration.lineThrough,
-                                    fontSize: 14,
-                                  ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                'Gratis',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2E7D32),
                                 ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '\$${food.discountedPrice}',
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
 
                             const SizedBox(height: 6),
@@ -257,26 +254,30 @@ class DetailMakananPage extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  // REMOVE BUTTON — sebelumnya mati, sekarang ada feedback
+                  // CLAIM NOW BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 55,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.green, width: 2),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),
                         ),
                       ),
-                      onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Fitur hapus donasi dalam pengembangan'),
-                        ),
-                      ),
+                      onPressed: () {
+                        claimController.claimItem(food);
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const MainPageBene(initialIndex: 2),
+                          ),
+                          (route) => false,
+                        );
+                      },
                       child: const Text(
-                        'Remove From Donations',
+                        'Claim Now',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

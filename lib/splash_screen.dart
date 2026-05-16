@@ -69,8 +69,8 @@ class _SplashScreenState extends State<SplashScreen>
     if (mounted) {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const OnboardingScreen(),
-          transitionsBuilder: (_, anim, __, child) =>
+          pageBuilder: (_, _, _) => const OnboardingScreen(),
+          transitionsBuilder: (_, anim, _, child) =>
               FadeTransition(opacity: anim, child: child),
           transitionDuration: const Duration(milliseconds: 500),
         ),
@@ -477,7 +477,7 @@ class _OnboardingPage extends StatelessWidget {
               child: Image.asset(
                 data.imagePath,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const _Placeholder(),
+                errorBuilder: (_, _, _) => const _Placeholder(),
               ),
             ),
           ),

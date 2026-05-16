@@ -18,16 +18,6 @@ class FoodController extends ChangeNotifier {
     return total;
   }
 
-  double totalPrice() {
-    double total = 0;
-
-    for (var food in watchlistFoods) {
-      total += food.discountedPrice * food.quantity;
-    }
-
-    return total;
-  }
-
   void addToWatchlist(FoodItem food) {
     if (food.quantity == 0) {
       watchlistFoods.add(food);

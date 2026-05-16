@@ -26,7 +26,7 @@ class WatchlistCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 4),
             ),
@@ -173,24 +173,22 @@ class WatchlistCard extends StatelessWidget {
 
                     Row(
                       children: [
-                        Text(
-                          '\$${food.originalPrice}',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            decoration: TextDecoration.lineThrough,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
                           ),
-                        ),
-
-                        const SizedBox(width: 5),
-
-                        Text(
-                          '\$${food.discountedPrice}',
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: const Text(
+                            'Gratis',
+                            style: TextStyle(
+                              color: Color(0xFF2E7D32),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
 

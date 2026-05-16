@@ -24,7 +24,7 @@ class CategoryButton extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isSelected ? primary.withOpacity(0.1) : Colors.grey[100],
+              color: isSelected ? primary.withValues(alpha: 0.1) : Colors.grey[100],
               borderRadius: BorderRadius.circular(15),
               border: Border.all(
                 color: isSelected ? primary : Colors.transparent,
