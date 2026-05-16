@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../models/food_item.dart';
+import 'package:save_n_serve/controllers/food_controller.dart';
 
-class FoodCard extends StatelessWidget {
+
+class FoodCard extends StatefulWidget {
   final FoodItem item;
 
   const FoodCard({super.key, required this.item});
 
   @override
+  State<FoodCard> createState() => _FoodCardState();
+}
+
+class _FoodCardState extends State<FoodCard> {
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
+
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -21,139 +29,218 @@ class FoodCard extends StatelessWidget {
           ),
         ],
       ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
-          // --- BAGIAN GAMBAR ---
+          // ================= GAMBAR =================
           Stack(
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
+
                 child: Image.asset(
-                  item.imagePath,
+                  widget.item.imagePath,
                   height: 180,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
               ),
-              // Bintang Rating (Pojok Kanan Atas)
+
+              // ===== RATING =====
               Positioned(
                 top: 12,
                 right: 12,
+
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 10,
+                    vertical: 6,
                   ),
+
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFF4CAF50),
+                    borderRadius: BorderRadius.circular(20),
                   ),
+
                   child: Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.yellow, size: 16),
+                      const Icon(Icons.star, color: Colors.yellow, size: 18),
+
                       const SizedBox(width: 4),
+
                       Text(
-                        item.rating.toString(),
+                        widget.item.rating.toString(),
+
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              // Tombol Tambah (Di atas gambar, pojok kanan bawah)
+
+              // ===== BUTTON + =====
+              // ===== BUTTON ACTION =====
               Positioned(
                 bottom: 12,
                 right: 12,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF4CAF50),
-                    shape: BoxShape.circle,
-                  ),
-                  padding: const EdgeInsets.all(6),
-                  child: const Icon(Icons.add, color: Colors.white, size: 28),
+
+                child: Row(
+                  children: [
+                    // ===== DELETE =====
+                    if (widget.item.quantity > 0)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            foodController.removeFromWatchlist(widget.item);
+                          });
+                        },
+
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF4CAF50),
+                            shape: BoxShape.circle,
+                          ),
+
+                          child: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+
+                    // ===== QUANTITY =====
+                    if (widget.item.quantity > 0)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+
+                        child: Text(
+                          widget.item.quantity.toString(),
+
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                    // ===== ADD =====
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          foodController.addToWatchlist(widget.item);
+                        });
+                      },
+
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF4CAF50),
+                          shape: BoxShape.circle,
+                        ),
+
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
 
-          // --- BAGIAN DETAIL (Teks) ---
+          // ================= DETAIL =================
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16),
+
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
-                // Baris 1: Nama & Jarak
+                // ===== NAMA + JARAK =====
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                   children: [
-                    Text(
-                      item.name,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                    Expanded(
+                      child: Text(
+                        widget.item.name,
+
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+
                     Row(
                       children: [
                         const Icon(
-                          Icons.near_me_outlined,
-                          size: 16,
+                          Icons.location_on_outlined,
+                          size: 18,
                           color: Colors.grey,
                         ),
-                        const SizedBox(width: 4),
+
                         Text(
-                          "${item.distance}km",
+                          "${widget.item.distance}km",
+
                           style: const TextStyle(
                             color: Colors.grey,
-                            fontSize: 14,
+                            fontSize: 16,
                           ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                // Baris 2: Lokasi & Harga
+
+                const SizedBox(height: 8),
+
+                // ===== LOKASI =====
+                Text(
+                  widget.item.location,
+
+                  style: const TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ===== PRICE =====
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
-                      child: Text(
-                        item.location,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 15,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    Text(
+                      "\$${widget.item.originalPrice}",
+
+                      style: const TextStyle(
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.red,
+                        fontSize: 14,
                       ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          "\$${item.originalPrice}",
-                          style: const TextStyle(
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "\$${item.discountedPrice}",
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+
+                    const SizedBox(width: 10),
+
+                    Text(
+                      "\$${widget.item.discountedPrice}",
+
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),

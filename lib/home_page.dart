@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../components/home/giver_body.dart';
 import '../components/home/beneficiary_body.dart';
+import 'package:save_n_serve/controllers/food_controller.dart';
+import 'package:save_n_serve/pages/home/home_tab.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -67,6 +69,75 @@ class _HomeTabState extends State<HomeTab> {
           ),
         ),
       ),
+
+      bottomNavigationBar: foodController.isWatchlistEmpty()
+          ? null
+          : Container(
+              margin: const EdgeInsets.all(16),
+
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50),
+                borderRadius: BorderRadius.circular(18),
+              ),
+
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      MainPageBene.of(context)?.changeTab(1);
+                    },
+
+                    child: Row(
+                      children: [
+                        Text(
+                          "View Watchlist",
+
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Text(
+                          "${foodController.totalItems()} items",
+
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Row(
+                    children: [
+                      Text(
+                        "\$${foodController.totalPrice().toStringAsFixed(2)}",
+
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+
+                      const SizedBox(width: 12),
+
+                      const Icon(Icons.shopping_bag, color: Colors.white),
+                    ],
+                  ),
+                ],
+              ),
+            ),
     );
   }
 
