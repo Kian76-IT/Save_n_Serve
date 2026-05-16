@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../components/home/giver_body.dart';
 import '../components/home/beneficiary_body.dart';
 import 'package:save_n_serve/controllers/food_controller.dart';
+import 'package:save_n_serve/controllers/home_controller.dart';
 import 'package:save_n_serve/pages/home/home_tab.dart';
 
 class HomeTab extends StatefulWidget {
@@ -14,7 +15,6 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   int _currentBanner = 0;
-  String _selectedRole = 'Beneficiary';
   late PageController _bannerController;
   Timer? _bannerTimer;
 
@@ -55,24 +55,30 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              _buildMovingBanner(),
-              const SizedBox(height: 16),
+        child: ListenableBuilder(
+          listenable: homeController,
+          builder: (context, _) => SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildMovingBanner(),
+                const SizedBox(height: 16),
 
-              // SWITCHER LOGIC
-              _selectedRole == 'Beneficiary'
-                  ? const BeneficiaryBody()
-                  : const GiverBody(),
-            ],
+                // SWITCHER LOGIC
+                homeController.selectedRole == 'Beneficiary'
+                    ? const BeneficiaryBody()
+                    : const GiverBody(),
+              ],
+            ),
           ),
         ),
       ),
 
-      bottomNavigationBar: foodController.isWatchlistEmpty()
-          ? null
-          : Container(
+      bottomNavigationBar: ListenableBuilder(
+          listenable: foodController,
+          builder: (context, _) {
+            if (foodController.isWatchlistEmpty()) return const SizedBox.shrink();
+
+            return Container(
               margin: const EdgeInsets.all(16),
 
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -93,10 +99,10 @@ class _HomeTabState extends State<HomeTab> {
 
                     child: Row(
                       children: [
-                        Text(
+                        const Text(
                           "View Watchlist",
 
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -118,26 +124,12 @@ class _HomeTabState extends State<HomeTab> {
                     ),
                   ),
 
-                  Row(
-                    children: [
-                      Text(
-                        "\$${foodController.totalPrice().toStringAsFixed(2)}",
-
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      const Icon(Icons.shopping_bag, color: Colors.white),
-                    ],
-                  ),
+                  const Icon(Icons.shopping_bag, color: Colors.white),
                 ],
               ),
-            ),
+            );
+          },
+        ),
     );
   }
 
@@ -180,13 +172,13 @@ class _HomeTabState extends State<HomeTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white30),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _selectedRole,
+          value: homeController.selectedRole,
           dropdownColor: Colors.black87,
           icon: const Icon(
             Icons.keyboard_arrow_down,
@@ -199,9 +191,7 @@ class _HomeTabState extends State<HomeTab> {
             fontWeight: FontWeight.bold,
           ),
           onChanged: (String? newValue) {
-            setState(() {
-              _selectedRole = newValue!;
-            });
+            homeController.setRole(newValue!);
           },
           items: ['Beneficiary', 'Giver'].map((String value) {
             return DropdownMenuItem<String>(value: value, child: Text(value));
@@ -216,7 +206,7 @@ class _HomeTabState extends State<HomeTab> {
       width: 36,
       height: 36,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: Colors.white.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
       child: const Icon(

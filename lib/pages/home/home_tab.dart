@@ -6,22 +6,25 @@ import 'package:save_n_serve/pages/profile/profile.dart';
 import 'package:save_n_serve/theme.dart';
 
 class MainPageBene extends StatefulWidget {
-  const MainPageBene({super.key});
+  final int initialIndex;
+  const MainPageBene({super.key, this.initialIndex = 0});
 
-  static _MainPageBeneState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_MainPageBeneState>();
+  static MainPageBeneState? of(BuildContext context) {
+    return context.findAncestorStateOfType<MainPageBeneState>();
   }
 
   @override
-  State<MainPageBene> createState() => _MainPageBeneState();
+  State<MainPageBene> createState() => MainPageBeneState();
 }
 
-class _MainPageBeneState extends State<MainPageBene> {
-  static _MainPageBeneState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_MainPageBeneState>();
-  }
+class MainPageBeneState extends State<MainPageBene> {
+  late int _selectedIndex;
 
-  int _selectedIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _pages = [
     const HomeTab(),

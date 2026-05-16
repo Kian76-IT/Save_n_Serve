@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:save_n_serve/models/food_item.dart';
 import 'package:save_n_serve/pages/watchlist/watchlist_card.dart';
 import 'package:save_n_serve/components/empty/empty_state.dart';
 import 'package:save_n_serve/controllers/food_controller.dart';
