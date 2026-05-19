@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:save_n_serve/models/food_item.dart';
+import 'package:save_n_serve/controllers/claim_controller.dart';
+import 'package:save_n_serve/pages/home/home_tab.dart';
 
 class DetailMakananPage extends StatelessWidget {
   final FoodItem food;
@@ -9,6 +10,49 @@ class DetailMakananPage extends StatelessWidget {
     super.key,
     required this.food,
   });
+
+  void _showReportDialog(BuildContext context) {
+    final reportController = TextEditingController();
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Laporkan Pelanggaran'),
+        content: TextField(
+          controller: reportController,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            hintText: 'Input alasan report...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Laporan Anda telah dikirim dan akan ditinjau oleh sistem.',
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: const Text(
+              'Kirim',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    ).then((_) => reportController.dispose());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +65,7 @@ class DetailMakananPage extends StatelessWidget {
         centerTitle: true,
 
         title: const Text(
-          "Donations Details",
+          'Donations Details',
           style: TextStyle(
             color: Colors.green,
             fontWeight: FontWeight.bold,
@@ -31,15 +75,20 @@ class DetailMakananPage extends StatelessWidget {
 
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
 
         actions: [
           IconButton(
+            icon: const Icon(Icons.flag_outlined, color: Colors.black),
+            tooltip: 'Laporkan',
+            onPressed: () => _showReportDialog(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Fitur bagikan dalam pengembangan')),
+            ),
           ),
         ],
       ),
@@ -49,7 +98,7 @@ class DetailMakananPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            /// IMAGE
+            // IMAGE
             Image.asset(
               food.imagePath,
               width: double.infinity,
@@ -63,7 +112,7 @@ class DetailMakananPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  /// TITLE + PRICE
+                  // TITLE + PRICE
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -91,38 +140,27 @@ class DetailMakananPage extends StatelessWidget {
 
                             const SizedBox(height: 4),
 
-                            Row(
-                              children: [
-
-                                Text(
-                                  "\$${food.originalPrice}",
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    decoration: TextDecoration.lineThrough,
-                                    fontSize: 14,
-                                  ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Text(
+                                'Gratis',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF2E7D32),
                                 ),
-
-                                const SizedBox(width: 8),
-
-                                Text(
-                                  "\$${food.discountedPrice}",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
 
                             const SizedBox(height: 6),
 
                             const Text(
-                              "Updated 17 minutes ago",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
+                              'Updated 17 minutes ago',
+                              style: TextStyle(color: Colors.grey, fontSize: 12),
                             ),
                           ],
                         ),
@@ -131,146 +169,115 @@ class DetailMakananPage extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 20),
-
                   const Divider(),
 
-                  /// EXPIRE
+                  // EXPIRE
                   const Text(
-                    "When does this expire?",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                    'When does this expire?',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
 
                   const SizedBox(height: 10),
-
+                  const Text('Best before date: 12 Jan 2028', style: TextStyle(fontSize: 14)),
+                  const SizedBox(height: 4),
+                  const Text('Expired date: 12 April 2028', style: TextStyle(fontSize: 14)),
+                  const SizedBox(height: 4),
                   const Text(
-                    "Best before date: 12 Jan 2028",
-                    style: TextStyle(fontSize: 14),
+                    'This deal expires on Save n Serve Tomorrow',
+                    style: TextStyle(color: Colors.redAccent, fontSize: 13),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 20),
+                  const Divider(),
 
-                  const Text(
-                    "Expired date: 12 April 2028",
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  // LOCATION — sebelumnya arrow mati, sekarang ada SnackBar
+                  GestureDetector(
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Fitur peta dalam pengembangan')),
+                    ),
+                    child: Row(
+                      children: [
 
-                  const SizedBox(height: 4),
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Color(0xFFEAEAEA),
+                          child: Icon(Icons.location_on, color: Colors.black54),
+                        ),
 
-                  const Text(
-                    "This deal expires on Save n Serve Tomorrow",
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 13,
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                food.name,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                food.location,
+                                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Icon(Icons.arrow_forward_ios, size: 18),
+                      ],
                     ),
                   ),
 
                   const SizedBox(height: 20),
-
                   const Divider(),
 
-                  /// LOCATION
-                  Row(
-                    children: [
-
-                      const CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Color(0xFFEAEAEA),
-                        child: Icon(
-                          Icons.location_on,
-                          color: Colors.black54,
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            Text(
-                              food.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            Text(
-                              food.location,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const Icon(Icons.arrow_forward_ios, size: 18),
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Divider(),
-
-                  /// DESCRIPTION
+                  // DESCRIPTION
                   const Text(
-                    "What you need to know",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
+                    'What you need to know',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                   ),
 
                   const SizedBox(height: 12),
-
                   const Text(
-                    "1. Add this item to your watchlist so you can easily check its availability before heading to the store.",
+                    '1. Add this item to your watchlist so you can easily check its availability before heading to the store.',
                     style: TextStyle(height: 1.6),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
-                    "2. Check the opening hours before you go.",
+                    '2. Check the opening hours before you go.',
                     style: TextStyle(height: 1.6),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
-                    "3. Find the item in-store and buy it at the till as usual.",
+                    '3. Find the item in-store and buy it at the till as usual.',
                     style: TextStyle(height: 1.6),
                   ),
 
                   const SizedBox(height: 40),
 
-                  /// BUTTON
+                  // CLAIM NOW BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 55,
-
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Colors.green,
-                          width: 2,
-                        ),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(40),
                         ),
                       ),
-
-                      onPressed: () {},
-
+                      onPressed: () {
+                        claimController.claimItem(food);
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (_) => const MainPageBene(initialIndex: 2),
+                          ),
+                          (route) => false,
+                        );
+                      },
                       child: const Text(
-                        "Remove From Donations",
+                        'Claim Now',
                         style: TextStyle(
-                          color: Colors.green,
+                          color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

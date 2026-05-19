@@ -12,9 +12,7 @@ class SocialLogin extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () {
-              print('Login with Google');
-            },
+            onTap: () {},
             child: Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
@@ -36,9 +34,7 @@ class SocialLogin extends StatelessWidget {
           ),
           const SizedBox(width: 28),
           GestureDetector(
-            onTap: () {
-              print('Login with Facebook');
-            },
+            onTap: () {},
             child: Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
@@ -56,9 +52,7 @@ class SocialLogin extends StatelessWidget {
           ),
           const SizedBox(width: 28),
           GestureDetector(
-            onTap: () {
-              print('Login with Twitter');
-            },
+            onTap: () {},
             child: Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(

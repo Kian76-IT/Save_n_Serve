@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  String? _selectedGender;
+  String? _selectedBirth;
+
+  static const _genders = ['Pria', 'Wanita', 'Prefer not to say'];
+  static const _birthYears = [
+    '1990', '1991', '1992', '1993', '1994', '1995',
+    '1996', '1997', '1998', '1999', '2000', '2001',
+    '2002', '2003', '2004', '2005', '2006',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +26,7 @@ class ProfilePage extends StatelessWidget {
       body: Stack(
         children: [
 
-          // BACKGROUND
+          // BACKGROUND DECORATIONS
           Positioned(
             top: -80,
             right: -60,
@@ -30,11 +45,7 @@ class ProfilePage extends StatelessWidget {
             right: 40,
             child: Transform.rotate(
               angle: 0.7,
-              child: Container(
-                width: 40,
-                height: 300,
-                color: Colors.green,
-              ),
+              child: Container(width: 40, height: 300, color: Colors.green),
             ),
           ),
 
@@ -56,11 +67,7 @@ class ProfilePage extends StatelessWidget {
             left: 50,
             child: Transform.rotate(
               angle: 0.7,
-              child: Container(
-                width: 40,
-                height: 300,
-                color: Colors.green,
-              ),
+              child: Container(width: 40, height: 300, color: Colors.green),
             ),
           ),
 
@@ -71,7 +78,7 @@ class ProfilePage extends StatelessWidget {
 
                   const SizedBox(height: 30),
 
-                  // PROFILE IMAGE
+                  // PROFILE IMAGE + EDIT PHOTO BUTTON
                   Stack(
                     children: [
 
@@ -83,7 +90,7 @@ class ProfilePage extends StatelessWidget {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 8,
                             ),
                           ],
@@ -95,20 +102,30 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ),
 
+                      // EDIT PHOTO — sebelumnya mati, sekarang ada SnackBar
                       Positioned(
                         right: 0,
                         bottom: 0,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
+                        child: GestureDetector(
+                          onTap: () =>
+                              ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Fitur ganti foto dalam pengembangan'),
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 14,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: const BoxDecoration(
+                              color: Colors.blue,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -117,7 +134,7 @@ class ProfilePage extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // CARD
+                  // FORM CARD
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 24),
                     padding: const EdgeInsets.all(24),
@@ -126,7 +143,7 @@ class ProfilePage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 10,
                         ),
                       ],
@@ -138,7 +155,7 @@ class ProfilePage extends StatelessWidget {
 
                         const Center(
                           child: Text(
-                            "Edit Profile",
+                            'Edit Profile',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
@@ -148,17 +165,29 @@ class ProfilePage extends StatelessWidget {
 
                         const SizedBox(height: 24),
 
-                        buildTextField("First Name", "Sabrina"),
-                        buildTextField("Last Name", "Aryan"),
-                        buildTextField("Username", "@Sabrina"),
-                        buildTextField("Email", "@SabrinaAry208@gmail.com"),
-                        buildTextField("Phone Number", "+234     904 6470"),
+                        _buildTextField('First Name', 'Sabrina'),
+                        _buildTextField('Last Name', 'Aryan'),
+                        _buildTextField('Username', '@Sabrina'),
+                        _buildTextField('Email', '@SabrinaAry208@gmail.com'),
+                        _buildTextField('Phone Number', '+234     904 6470'),
 
-                        buildDropdown("Birth"),
-                        buildDropdown("Gender"),
+                        _buildDropdown(
+                          'Birth Year',
+                          _selectedBirth,
+                          _birthYears,
+                          (v) => setState(() => _selectedBirth = v),
+                        ),
+
+                        _buildDropdown(
+                          'Gender',
+                          _selectedGender,
+                          _genders,
+                          (v) => setState(() => _selectedGender = v),
+                        ),
 
                         const SizedBox(height: 30),
 
+                        // CHANGE PASSWORD — sebelumnya mati, sekarang SnackBar
                         SizedBox(
                           width: double.infinity,
                           height: 50,
@@ -169,23 +198,25 @@ class ProfilePage extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () =>
+                                ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Fitur ganti password dalam pengembangan'),
+                              ),
+                            ),
                             child: const Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Change Password",
+                                  'Change Password',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 SizedBox(width: 10),
-                                Icon(
-                                  Icons.lock,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
+                                Icon(Icons.lock, color: Colors.white, size: 18),
                               ],
                             ),
                           ),
@@ -204,21 +235,15 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget buildTextField(String title, String hint) {
+  Widget _buildTextField(String title, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.black54),
         ),
-
         const SizedBox(height: 6),
-
         TextField(
           decoration: InputDecoration(
             hintText: hint,
@@ -231,27 +256,25 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 16),
       ],
     );
   }
 
-  Widget buildDropdown(String title) {
+  Widget _buildDropdown(
+    String title,
+    String? value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.black54),
         ),
-
         const SizedBox(height: 6),
-
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
@@ -260,15 +283,19 @@ class ProfilePage extends StatelessWidget {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: null,
-              hint: Text("Select"),
+              value: value,
+              hint: const Text('Select'),
               isExpanded: true,
-              items: [],
-              onChanged: null,
+              onChanged: onChanged,
+              items: items
+                  .map((item) => DropdownMenuItem(
+                        value: item,
+                        child: Text(item),
+                      ))
+                  .toList(),
             ),
           ),
         ),
-
         const SizedBox(height: 16),
       ],
     );
