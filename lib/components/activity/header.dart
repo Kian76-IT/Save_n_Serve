@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:save_n_serve/theme.dart';
 
 class Header extends StatelessWidget {
-  const Header({super.key});
+  final int selectedTab; // 0 = Done, 1 = On Process
+  final ValueChanged<int> onTabChanged;
+
+  const Header({
+    super.key,
+    required this.selectedTab,
+    required this.onTabChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,33 +26,15 @@ class Header extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        const Divider(thickness: 3, color: Color(0xfff2e7d32)),
+        const Divider(thickness: 3, color: Color(0xFF2E7D32)),
 
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           child: Row(
             children: [
-              Column(
-                children: [
-                  Text(
-                    "Done",
-                    style: AppTextStyle.interMedium20.copyWith(
-                      fontSize: 25,
-                      color: text,
-                    ),
-                  ),
-                  const SizedBox(height: 0),
-                  Container(height: 2, width: 55, color: primary),
-                ],
-              ),
+              _buildTab("Done", 0, 55),
               const SizedBox(width: 18),
-              Text(
-                "On Process",
-                style: AppTextStyle.interMedium20.copyWith(
-                  fontSize: 25,
-                  color: text,
-                ),
-              ),
+              _buildTab("On Process", 1, 102),
             ],
           ),
         ),
@@ -54,31 +43,62 @@ class Header extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-                decoration: BoxDecoration(
-                  color: background,
-                  border: Border.all(color: Colors.grey.shade400, width: 2),
-                  borderRadius: BorderRadius.circular(30),
+              GestureDetector(
+                onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Filter role dalam pengembangan')),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Beneficiary',
-                      style: AppTextStyle.interRegular14.copyWith(
-                        color: primary,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: background,
+                    border: Border.all(color: Colors.grey.shade400, width: 2),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Beneficiary',
+                        style: AppTextStyle.interRegular14.copyWith(
+                          color: primary,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Icon(Icons.keyboard_arrow_down, size: 20),
-                  ],
+                      const SizedBox(width: 10),
+                      const Icon(Icons.keyboard_arrow_down, size: 20),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTab(String label, int index, double underlineWidth) {
+    final isActive = selectedTab == index;
+    return GestureDetector(
+      onTap: () => onTabChanged(index),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: AppTextStyle.interMedium20.copyWith(
+              fontSize: 25,
+              color: isActive ? text : Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 0),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: 2,
+            width: isActive ? underlineWidth : 0,
+            color: primary,
+          ),
+        ],
+      ),
     );
   }
 }

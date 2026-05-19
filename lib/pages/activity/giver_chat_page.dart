@@ -32,6 +32,12 @@ class _GiverChatPageState extends State<GiverChatPage> {
     },
   ];
 
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
   void sendMessage() {
 
     if (messageController.text.trim().isEmpty) {
