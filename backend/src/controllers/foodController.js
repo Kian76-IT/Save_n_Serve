@@ -1,7 +1,5 @@
 import supabase from "../supabaseClient.js";
 
-
-
 /*
   Calculate distance in km between two lat/lng coordinates (Haversine formula).
  */
