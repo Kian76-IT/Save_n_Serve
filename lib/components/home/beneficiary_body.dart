@@ -16,10 +16,7 @@ class _BeneficiaryBodyState extends State<BeneficiaryBody> {
   @override
   void initState() {
     super.initState();
-    // Guard: hanya fetch jika data belum ada, agar tidak re-fetch saat ganti role
-    if (_controller.foodList.isEmpty) {
-      _controller.fetchFoods();
-    }
+    _controller.fetchFoods();
   }
 
   @override

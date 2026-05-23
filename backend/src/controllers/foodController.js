@@ -31,7 +31,9 @@ export const createFood = async (req, res) => {
       pickup_location,
       pickup_lat,
       pickup_lng,
+      pickup_start,
       expiry_date,
+      image_url,
     } = req.body;
 
     const { data, error } = await supabase
@@ -45,14 +47,27 @@ export const createFood = async (req, res) => {
         pickup_location,
         pickup_lat: pickup_lat ?? null,
         pickup_lng: pickup_lng ?? null,
+        pickup_start: pickup_start ?? null,
         expiry_date,
         status: "available",
+        image_url: image_url ?? null,
       })
       .select()
       .single();
 
     if (error) {
       return res.status(400).json({ message: error.message });
+    }
+
+    // Guard: Supabase returns {data:null, error:null} when the PostgREST
+    // schema cache is stale after a column rename (e.g. id → food_id).
+    // The INSERT may or may not have committed — treat this as a server fault
+    // so the client never silently assumes success.
+    if (!data) {
+      return res.status(500).json({
+        message:
+          "Insert returned no data. Run `NOTIFY pgrst, 'reload schema'` in the Supabase SQL editor to refresh the PostgREST schema cache, then retry.",
+      });
     }
 
     return res.status(201).json({
@@ -289,7 +304,7 @@ export const cancelFood = async (req, res) => {
     const { data: existing, error: findError } = await supabase
       .from("foods")
       .select("*")
-      .eq("food_id", food_id)
+      .eq("id", food_id)
       .eq("giver_id", req.user.id)
       .single();
 
@@ -306,7 +321,7 @@ export const cancelFood = async (req, res) => {
     const { data, error } = await supabase
       .from("foods")
       .update({ status: "cancelled" })
-      .eq("food_id", food_id)
+      .eq("id", food_id)
       .select()
       .single();
 

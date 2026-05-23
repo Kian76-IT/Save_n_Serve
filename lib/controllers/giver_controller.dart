@@ -1,4 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:save_n_serve/constants/api_constants.dart';
+import 'package:save_n_serve/controllers/giver_activity_controller.dart';
+import 'package:save_n_serve/models/food_item.dart';
+import 'package:save_n_serve/services/session_service.dart';
 
 class GiverController extends ChangeNotifier {
   final titleController       = TextEditingController();
@@ -13,6 +20,32 @@ class GiverController extends ChangeNotifier {
   final List<int> quantities = [1, 2, 3, 4, 5];
   int _selectedQuantity = 1;
   int get selectedQuantity => _selectedQuantity;
+
+  final _picker = ImagePicker();
+  List<XFile> _pickedImages = [];
+  List<XFile> get pickedImages => List.unmodifiable(_pickedImages);
+
+  Future<void> pickImages() async {
+    final remaining = 10 - _pickedImages.length;
+    if (remaining <= 0) return;
+    final picked = await _picker.pickMultiImage(
+      limit: remaining,
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
+    );
+    if (picked.isNotEmpty) {
+      _pickedImages = [..._pickedImages, ...picked];
+      notifyListeners();
+    }
+  }
+
+  void removeImage(int index) {
+    final updated = List<XFile>.of(_pickedImages);
+    updated.removeAt(index);
+    _pickedImages = updated;
+    notifyListeners();
+  }
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
@@ -40,9 +73,7 @@ class GiverController extends ChangeNotifier {
   }
 
   bool isTimeReversed() {
-    if (_startTime == null || _endTime == null) {
-      return false;
-    }
+    if (_startTime == null || _endTime == null) return false;
     final startMin = _startTime!.hour * 60 + _startTime!.minute;
     final endMin   = _endTime!.hour   * 60 + _endTime!.minute;
     return endMin <= startMin;
@@ -53,20 +84,125 @@ class GiverController extends ChangeNotifier {
         descriptionController.text.trim().isEmpty) {
       return false;
     }
-    if (_startTime == null || _endTime == null) {
-      return false;
-    }
+    if (_startTime == null || _endTime == null) return false;
     return !isTimeReversed();
   }
 
-  Future<bool> submitDonation() async {
-    if (!validate()) return false;
+  // Uploads picked images to the backend, returns a comma-separated URL string.
+  // Returns empty string if there are no images or the upload fails.
+  Future<String> _uploadImages(String token) async {
+    if (_pickedImages.isEmpty) return '';
+    try {
+      final uri = Uri.parse('${ApiConstants.baseUrl}/uploads');
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $token';
+
+      for (final img in _pickedImages) {
+        request.files.add(
+          await http.MultipartFile.fromPath('images', img.path,
+              filename: img.name),
+        );
+      }
+
+      final streamed = await request.send().timeout(const Duration(seconds: 30));
+      final response = await http.Response.fromStream(streamed);
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        if (body is Map && body['urls'] is List) {
+          return (body['urls'] as List).map((e) => e.toString()).join(',');
+        }
+      }
+    } catch (_) {}
+    return '';
+  }
+
+  // Returns null on success, or an error string to display in the UI.
+  Future<String?> submitDonation() async {
+    if (!validate()) return 'Validasi gagal. Periksa kembali isian form.';
+
     _isSubmitting = true;
     notifyListeners();
-    await Future.delayed(const Duration(milliseconds: 800));
-    _isSubmitting = false;
-    notifyListeners();
-    return true;
+
+    try {
+      final token = SessionService.token;
+      if (token == null) {
+        _isSubmitting = false;
+        notifyListeners();
+        return 'Sesi tidak ditemukan. Silakan login ulang.';
+      }
+
+      // Upload images first; proceed even if upload returns empty.
+      final imageUrlString = await _uploadImages(token);
+
+      // Build the pickup window from today's date + the chosen times.
+      // If the end time has already passed today, advance both start AND end
+      // by one day so the window stays coherent (same relative gap).
+      final now = DateTime.now();
+      DateTime pickupStart = DateTime(
+        now.year, now.month, now.day,
+        _startTime!.hour, _startTime!.minute,
+      );
+      DateTime expiry = DateTime(
+        now.year, now.month, now.day,
+        _endTime!.hour, _endTime!.minute,
+      );
+      if (!expiry.isAfter(now)) {
+        pickupStart = pickupStart.add(const Duration(days: 1));
+        expiry = expiry.add(const Duration(days: 1));
+      }
+
+      final url = Uri.parse('${ApiConstants.baseUrl}/foods');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'name': titleController.text.trim(),
+          'description': descriptionController.text.trim(),
+          'quantity': _selectedQuantity,
+          'portion_unit': 'porsi',
+          'status': 'available',
+          'pickup_location': instructionController.text.trim().isNotEmpty
+              ? instructionController.text.trim()
+              : 'Lokasi belum disetel',
+          // .toUtc().toIso8601String() appends 'Z', giving Supabase an
+          // unambiguous UTC timestamp ("2026-05-22T16:55:00.000Z").
+          // This is intentional — never send a naive local string.
+          'pickup_start': pickupStart.toUtc().toIso8601String(),
+          'expiry_date': expiry.toUtc().toIso8601String(),
+          if (imageUrlString.isNotEmpty) 'image_url': imageUrlString,
+        }),
+      );
+
+      _isSubmitting = false;
+      notifyListeners();
+
+      if (response.statusCode == 201) {
+        try {
+          final body = jsonDecode(response.body) as Map<String, dynamic>;
+          final foodJson = body['food'] as Map<String, dynamic>?;
+          if (foodJson != null) {
+            giverActivityController.prependFood(FoodItem.fromApi(foodJson));
+          }
+        } catch (_) {}
+        reset();
+        return null;
+      }
+
+      try {
+        final body = jsonDecode(response.body) as Map<String, dynamic>;
+        return body['message'] as String? ?? 'Server error (${response.statusCode})';
+      } catch (_) {
+        return 'Server error (${response.statusCode})';
+      }
+    } catch (e) {
+      _isSubmitting = false;
+      notifyListeners();
+      return 'Koneksi gagal: $e';
+    }
   }
 
   void reset() {
@@ -76,6 +212,7 @@ class GiverController extends ChangeNotifier {
     _startTime = null;
     _endTime   = null;
     _selectedQuantity = 1;
+    _pickedImages = [];
     notifyListeners();
   }
 

@@ -5,15 +5,29 @@ import 'package:save_n_serve/theme.dart';
 import 'package:save_n_serve/components/empty/empty_state.dart';
 
 class Activity extends StatefulWidget {
-  const Activity({super.key});
+  final int initialTab;
+  const Activity({super.key, this.initialTab = 0});
 
   @override
   State<Activity> createState() => _ActivityState();
 }
 
 class _ActivityState extends State<Activity> {
-  // 0 = Done, 1 = On Process
-  int _selectedTab = 0;
+  // 0 = On Process, 1 = Done
+  late int _selectedTab;
+  final Set<ClaimedItem> _grabbing = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTab = widget.initialTab;
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await claimController.loadClaims();
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +46,8 @@ class _ActivityState extends State<Activity> {
               ),
               Expanded(
                 child: _selectedTab == 0
-                    ? _buildDoneTab()
-                    : _buildOnProcessTab(),
+                    ? _buildOnProcessTab()
+                    : _buildDoneTab(),
               ),
             ],
           ),
@@ -83,12 +97,25 @@ class _ActivityState extends State<Activity> {
             children: [
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                child: Image.asset(
-                  item.food.imagePath,
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+                child: item.food.imageUrls.isNotEmpty
+                    ? Image.network(
+                        item.food.imageUrls.first,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (ctx, err, st) => Image.asset(
+                          item.food.imagePath,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Image.asset(
+                        item.food.imagePath,
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
               Positioned(
                 top: 14,
@@ -160,11 +187,14 @@ class _ActivityState extends State<Activity> {
                   children: [
                     const Icon(Icons.location_on_outlined, size: 15, color: Colors.grey),
                     const SizedBox(width: 4),
-                    Text(
-                      item.food.location,
-                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    Flexible(
+                      child: Text(
+                        item.food.location,
+                        style: const TextStyle(color: Colors.grey, fontSize: 13),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const Spacer(),
+                    const SizedBox(width: 8),
                     Text(
                       '${item.food.distance} km',
                       style: const TextStyle(color: Colors.grey, fontSize: 13),
@@ -216,6 +246,47 @@ class _ActivityState extends State<Activity> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 10),
+                item.rating == null
+                    ? SizedBox(
+                        width: double.infinity,
+                        height: 44,
+                        child: OutlinedButton.icon(
+                          onPressed: () => _showRatingSheet(context, item),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFF4CAF50)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          icon: const Icon(Icons.star_outline, color: Color(0xFF4CAF50), size: 18),
+                          label: const Text(
+                            'Beri Penilaian',
+                            style: TextStyle(
+                              color: Color(0xFF4CAF50),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...List.generate(
+                            5,
+                            (i) => Icon(
+                              i < item.rating! ? Icons.star : Icons.star_border,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Sudah dinilai',
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          ),
+                        ],
+                      ),
               ],
             ),
           ),
@@ -242,6 +313,162 @@ class _ActivityState extends State<Activity> {
     );
   }
 
+  Future<void> _confirmCancelClaim(BuildContext context, ClaimedItem item) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Batalkan Klaim?'),
+        content: const Text('Makanan ini akan tersedia kembali untuk orang lain.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Tidak'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ya, Batalkan', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await claimController.cancelItem(item);
+    } catch (e) {
+      if (mounted) {
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showRatingSheet(BuildContext context, ClaimedItem item) {
+    int selectedStars = 0;
+    final commentController = TextEditingController();
+    bool submitting = false;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Padding(
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 24,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Beri Penilaian',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                item.food.name,
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (i) {
+                  final star = i + 1;
+                  return GestureDetector(
+                    onTap: () => setSheetState(() => selectedStars = star),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: Icon(
+                        star <= selectedStars ? Icons.star : Icons.star_border,
+                        color: Colors.amber,
+                        size: 40,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: commentController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  hintText: 'Komentar (opsional)...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2A6B35),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: submitting || selectedStars == 0
+                      ? null
+                      : () async {
+                          setSheetState(() => submitting = true);
+                          try {
+                            await claimController.rateItem(
+                              item,
+                              selectedStars,
+                              commentController.text.trim(),
+                            );
+                            if (ctx.mounted) Navigator.pop(ctx);
+                          } catch (e) {
+                            if (ctx.mounted) {
+                              Navigator.pop(ctx);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    e.toString().replaceFirst('Exception: ', ''),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                  child: submitting
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Kirim Penilaian',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) => commentController.dispose());
+  }
+
   Widget _buildClaimCard(ClaimedItem item) {
     final timeExpired = item.remainingSeconds == 0;
     return Container(
@@ -263,12 +490,25 @@ class _ActivityState extends State<Activity> {
           // Food image
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Image.asset(
-              item.food.imagePath,
-              height: 140,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: item.food.imageUrls.isNotEmpty
+                ? Image.network(
+                    item.food.imageUrls.first,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (ctx, err, st) => Image.asset(
+                      item.food.imagePath,
+                      height: 140,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    item.food.imagePath,
+                    height: 140,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
           ),
 
           Padding(
@@ -305,33 +545,84 @@ class _ActivityState extends State<Activity> {
 
                 const SizedBox(height: 16),
 
-                // Instruction panel — replaces the complete button
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF8E1),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Colors.orange.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                      SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'Tunjukkan layar ini kepada Pemberi/Kasir saat melakukan pembayaran di lokasi.',
-                          style: TextStyle(
-                            color: Color(0xFF795548),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                            height: 1.4,
-                          ),
-                        ),
+                // Grab Now — receiver confirms physical pickup
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: timeExpired
+                          ? Colors.grey
+                          : const Color(0xFF2A6B35),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
-                    ],
+                    ),
+                    icon: _grabbing.contains(item)
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.storefront_outlined,
+                            color: Colors.white,
+                          ),
+                    label: Text(
+                      _grabbing.contains(item)
+                          ? 'Processing...'
+                          : timeExpired
+                              ? 'Pickup window closed'
+                              : 'I have Arrived — Grab Now',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    onPressed: timeExpired || _grabbing.contains(item)
+                        ? null
+                        : () async {
+                            setState(() => _grabbing.add(item));
+                            try {
+                              await claimController.grabItem(item);
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      e.toString().replaceFirst(
+                                            'Exception: ',
+                                            '',
+                                          ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() => _grabbing.remove(item));
+                              }
+                            }
+                          },
+                  ),
+                ),
+
+                // Cancel claim
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: _grabbing.contains(item)
+                        ? null
+                        : () => _confirmCancelClaim(context, item),
+                    child: const Text(
+                      'Batalkan',
+                      style: TextStyle(color: Colors.red, fontSize: 14),
+                    ),
                   ),
                 ),
               ],

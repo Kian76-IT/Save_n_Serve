@@ -5,15 +5,37 @@ import 'package:save_n_serve/components/signup/button_password.dart';
 import 'package:save_n_serve/components/signup/button_signup.dart';
 import 'package:save_n_serve/components/signup/button_switch.dart';
 import 'package:save_n_serve/components/signup/button_username.dart';
-import 'package:save_n_serve/components/signup/button_confrim.dart';
+import 'package:save_n_serve/components/signup/button_confrim.dart'; 
 import 'package:save_n_serve/components/signup/text_or_sign.dart';
 import 'package:save_n_serve/components/signup/header.dart';
 import 'package:save_n_serve/components/signup/text_terms.dart';
-
 import 'package:save_n_serve/theme.dart';
 
-class SignUp extends StatelessWidget {
+class SignUp extends StatefulWidget {
   const SignUp({super.key});
+
+  @override
+  State<SignUp> createState() => _SignUpState();
+}
+
+class _SignUpState extends State<SignUp> {
+  // 1. SIAPKAN KABEL PENANGKAP TEKS DI SINI
+  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  bool _isGiver = false;
+
+  @override
+  void dispose() {
+    // Bersihkan memori saat halaman ditutup
+    fullNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,35 +58,43 @@ class SignUp extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    // toggle switch
                     const SizedBox(height: 40),
                     ButtonSwitch(),
-                    // username or email
+                    
                     const SizedBox(height: 20),
-                    ButtonUsername(),
-
-                    // Text Field Password
-                    const SizedBox(height: 20),
-                    ButtonPassword(),
-
-                    // Buttong Confrim
-                    const SizedBox(height: 20),
-                    ButtonConfrim(),
+                    // 2. KARENA BUTTON_USERNAME UDAH ADA COLOKANNYA, LANGSUNG PASANG
+                    ButtonUsername(controller: emailController),
 
                     const SizedBox(height: 20),
-                    ButtonCompany(),
+                    // 3. SEPERTI USERNAME, PASANG JUGA KE PASSWORD
+                    ButtonPassword(controller: passwordController),
 
-                    // Teks SignUP with
                     const SizedBox(height: 20),
-                    ButtonSignup(),
+                    // 4. KITA OPER KE COFRIM (Nanti file ini bakal merah, wajar!)
+                    ButtonConfrim(controller: confirmPasswordController),
+
+                    const SizedBox(height: 20),
+                    // 5. OPER KE NAMA PERUSAHAAN / FULL NAME (Bakal merah juga!)
+                    ButtonCompany(
+                      controller: fullNameController,
+                      onToggle: (v) => setState(() => _isGiver = v),
+                    ),
+
+                    const SizedBox(height: 20),
+                    // 6. OPER SEMUA CONTROLLER KE TOMBOL EKSEKUSI UTAMA (Bakal merah!)
+                    ButtonSignup(
+                      fullNameController: fullNameController,
+                      emailController: emailController,
+                      passwordController: passwordController,
+                      isGiver: _isGiver,
+                    ),
 
                     const SizedBox(height: 20),
                     TeksOrSignUp(),
 
-                    // social logini
                     const SizedBox(height: 15),
                     SocialLogin(),
-                    // Teks Terms of Service
+                    
                     const SizedBox(height: 82),
                     TextTerms(),
                   ],

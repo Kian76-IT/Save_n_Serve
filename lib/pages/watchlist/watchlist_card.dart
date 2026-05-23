@@ -40,12 +40,25 @@ class WatchlistCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(14),
-                  child: Image.asset(
-                    food.imagePath,
-                    width: 110,
-                    height: 95,
-                    fit: BoxFit.cover,
-                  ),
+                  child: food.imageUrls.isNotEmpty
+                      ? Image.network(
+                          food.imageUrls.first,
+                          width: 110,
+                          height: 95,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Image.asset(
+                            food.imagePath,
+                            width: 110,
+                            height: 95,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Image.asset(
+                          food.imagePath,
+                          width: 110,
+                          height: 95,
+                          fit: BoxFit.cover,
+                        ),
                 ),
 
                 // DELETE — sebelumnya tidak bisa diklik, sekarang menghapus item

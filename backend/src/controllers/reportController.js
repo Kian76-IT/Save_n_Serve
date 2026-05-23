@@ -12,28 +12,14 @@ export const createReport = async (req, res) => {
       return res.status(400).json({ message: "You cannot report yourself" });
     }
 
-    // Check reported user exists
-    const { data: reportedUser, error: userError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", reported_id)
-      .single();
-
-    if (userError || !reportedUser) {
-      return res.status(404).json({ message: "Reported user not found" });
-    }
-
     const { data, error } = await supabase
       .from("reports")
-      .insert({
+      .insert([{
         reporter_id: req.user.id,
-        reported_id,
+        reported_user_id: reported_id,
         reason,
-        description: description ?? null,
-        status: "pending",
-      })
-      .select()
-      .single();
+        description: description || "",
+      }]);
 
     if (error) {
       return res.status(400).json({ message: error.message });

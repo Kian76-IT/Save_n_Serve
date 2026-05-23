@@ -15,14 +15,30 @@ export const claimFood = async (req, res) => {
     const { data: food, error: foodError } = await supabase
       .from("foods")
       .select("*")
-      .eq("food_id", food_id)
+      .eq("id", food_id)
       .eq("status", "available")
-      .gt("expiry_date", new Date().toISOString())
       .single();
 
     if (foodError || !food) {
       return res.status(404).json({
-        message: "Food is not available or has expired",
+        message: "Food is not available",
+      });
+    }
+
+    // Supabase may return naive timestamps like "2026-05-22 16:55:00" (no Z /
+    // +HH:MM).  new Date() would parse that as local server time — wrong.
+    // Append 'Z' when there is no zone marker, and replace any space separator
+    // with 'T' so V8 treats the string as strict ISO 8601 UTC.
+    let expiryStr = (food.expiry_date ?? "").toString().trim();
+    if (!expiryStr.endsWith("Z") && !expiryStr.includes("+")) {
+      expiryStr = expiryStr.replace(" ", "T") + "Z";
+    }
+    const expiryTime = new Date(expiryStr).getTime();
+    const currentTime = new Date().getTime();
+
+    if (currentTime > expiryTime) {
+      return res.status(400).json({
+        message: "Food has expired",
       });
     }
 
@@ -67,10 +83,10 @@ export const claimFood = async (req, res) => {
     await supabase
       .from("foods")
       .update({ status: "claimed" })
-      .eq("food_id", food_id);
+      .eq("id", food_id);
 
-    // Notify giver
-    await createNotification({
+    // Notify giver (fire-and-forget — notification failure must not affect claim response)
+    createNotification({
       user_id: food.giver_id,
       title: "Your food has been claimed!",
       body: `Someone has claimed "${food.name}". Please confirm the pickup.`,
@@ -103,11 +119,18 @@ export const getMyClaims = async (req, res) => {
         `
         *,
         foods (
-          food_id,
+          id,
+          giver_id,
           name,
           pickup_location,
           expiry_date,
-          profiles:giver_id (full_name)
+          pickup_start,
+          image_url,
+          quantity,
+          status,
+          description,
+          portion_unit,
+          profiles:giver_id (id, full_name)
         )
       `,
         { count: "exact" }
@@ -243,8 +266,7 @@ export const confirmPickup = async (req, res) => {
       points: POINTS_PER_DONATION,
     });
 
-    // Notify receiver
-    await createNotification({
+    createNotification({
       user_id: claim.receiver_id,
       title: "Pickup confirmed!",
       body: `Your pickup for "${claim.foods.name}" has been confirmed by the giver.`,
@@ -298,8 +320,7 @@ export const cancelClaim = async (req, res) => {
       .update({ status: "available" })
       .eq("food_id", claim.food_id);
 
-    // Notify giver
-    await createNotification({
+    createNotification({
       user_id: claim.foods.giver_id,
       title: "Claim cancelled",
       body: `A receiver cancelled their claim on "${claim.foods.name}". The food is now available again.`,
@@ -308,6 +329,72 @@ export const cancelClaim = async (req, res) => {
     });
 
     return res.status(200).json({ message: "Claim cancelled" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+/*
+  PATCH /claims/:claim_id/grab
+  Receiver confirms physical pickup ("Grab Now").
+  - Decrements food.quantity by 1.
+  - If quantity reaches 0, marks food as 'completed'.
+  - Marks the claim as 'approved' so it moves to the Done tab.
+ */
+export const grabFood = async (req, res) => {
+  try {
+    const { claim_id } = req.params;
+
+    // Fetch claim + food, scoped to the requesting receiver
+    const { data: claim, error: claimError } = await supabase
+      .from("claims")
+      .select(`*, foods(*)`)
+      .eq("claim_id", claim_id)
+      .eq("receiver_id", req.user.id)
+      .single();
+
+    if (claimError || !claim) {
+      return res.status(404).json({ message: "Claim not found" });
+    }
+
+    if (claim.claim_status !== "pending") {
+      return res.status(400).json({ message: "Claim is not in pending state" });
+    }
+
+    const food = claim.foods;
+    const newQty = Math.max(0, (food.quantity ?? 1) - 1);
+    const newFoodStatus = newQty === 0 ? "completed" : "claimed";
+
+    // Decrement quantity; mark food completed when stock hits 0
+    await supabase
+      .from("foods")
+      .update({ quantity: newQty, status: newFoodStatus })
+      .eq("id", claim.food_id);
+
+    // Approve the claim
+    const { data: updatedClaim, error: updateError } = await supabase
+      .from("claims")
+      .update({ claim_status: "approved" })
+      .eq("claim_id", claim_id)
+      .select()
+      .single();
+
+    if (updateError) {
+      return res.status(400).json({ message: updateError.message });
+    }
+
+    createNotification({
+      user_id: food.giver_id,
+      title: "Food picked up!",
+      body: `"${food.name}" has been collected by the receiver.`,
+      type: "confirm",
+      reference_id: claim_id,
+    });
+
+    return res.status(200).json({
+      message: "Pickup confirmed",
+      claim: updatedClaim,
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -354,6 +441,14 @@ export const rategiver = async (req, res) => {
     if (error) {
       return res.status(400).json({ message: error.message });
     }
+
+    createNotification({
+      user_id: claim.foods.giver_id,
+      title: "Review Baru Diterima! ⭐",
+      body: `Penerima memberikan rating ${rating} bintang untuk "${claim.foods.name}".`,
+      type: "review",
+      reference_id: claim_id,
+    });
 
     return res.status(200).json({
       message: "Rating submitted",

@@ -7,6 +7,7 @@ import {
   confirmPickup,
   cancelClaim,
   rategiver,
+  grabFood,
 } from "../controllers/claimController.js";
 
 import { ratingValidator } from "../validator/claimValidator.js";
@@ -30,6 +31,9 @@ router.post("/:food_id", roleMiddleware("receiver"), claimFood);
 
 // Receiver: cancel claim
 router.patch("/:claim_id/cancel", roleMiddleware("receiver"), cancelClaim);
+
+// Receiver: confirm physical pickup ("Grab Now")
+router.patch("/:claim_id/grab", roleMiddleware("receiver"), grabFood);
 
 // Receiver: rate giver after completed pickup
 router.post(

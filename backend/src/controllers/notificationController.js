@@ -1,4 +1,4 @@
-import supabase from "../supabaseClient.js";
+import supabase, { supabaseAdmin } from "../supabaseClient.js";
 
 export const createNotification = async ({
   user_id,
@@ -7,17 +7,21 @@ export const createNotification = async ({
   type,
   reference_id = null,
 }) => {
-  const { error } = await supabase.from("notifications").insert({
-    user_id,
-    title,
-    body,
-    type,
-    reference_id,
-    is_read: false,
-  });
+  try {
+    const { error } = await supabaseAdmin.from("notifications").insert({
+      user_id,
+      title,
+      body,
+      type,
+      reference_id,
+      is_read: false,
+    });
 
-  if (error) {
-    console.error("[Notification] Failed to create:", error.message);
+    if (error) {
+      console.error("[Notification] Failed to create:", error.message);
+    }
+  } catch (err) {
+    console.error("[Notification] Unexpected error:", err.message);
   }
 };
 

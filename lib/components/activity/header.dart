@@ -32,9 +32,9 @@ class Header extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
           child: Row(
             children: [
-              _buildTab("Done", 0, 55),
+              _buildTab("On Process", 0, 102),
               const SizedBox(width: 18),
-              _buildTab("On Process", 1, 102),
+              _buildTab("Done", 1, 55),
             ],
           ),
         ),
