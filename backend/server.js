@@ -7,6 +7,7 @@ import foodRoutes from "./src/routes/foodRoutes.js";
 import claimRoutes from "./src/routes/claimRoutes.js";
 import reportRoutes from "./src/routes/reportRoutes.js";
 import notificationRoutes from "./src/routes/notificationRoutes.js";
+import uploadRoutes from "./src/routes/uploadRoutes.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/foods", foodRoutes);
 app.use("/claims", claimRoutes);
 app.use("/reports", reportRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/uploads", uploadRoutes);
 
 app.get("/", (_req, res) => {
   res.json({ message: "Save N Serve API Running 🍱" });

@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:save_n_serve/theme.dart';
 
 class ButtonCompany extends StatefulWidget {
-  const ButtonCompany({super.key});
+  final TextEditingController controller;
+  final ValueChanged<bool> onToggle;
+
+  const ButtonCompany({
+    super.key,
+    required this.controller,
+    required this.onToggle,
+  });
 
   @override
   State<ButtonCompany> createState() => _ButtonCompanyState();
@@ -19,10 +26,11 @@ class _ButtonCompanyState extends State<ButtonCompany> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextField(
+            controller: widget.controller,
             obscureText: false,
             readOnly: !isCompanySelected,
             decoration: InputDecoration(
-              hintText: 'I Working for a Company',
+              hintText: 'I am Working for a Company',
               hintStyle: AppTextStyle.regularPoppins20.copyWith(
                 color: Colors.grey,
                 fontSize: 15,
@@ -34,6 +42,7 @@ class _ButtonCompanyState extends State<ButtonCompany> {
                     setState(() {
                       isCompanySelected = !isCompanySelected;
                     });
+                    widget.onToggle(isCompanySelected);
                   },
                   icon: Icon(
                     isCompanySelected

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/food_item.dart';
 import '../../pages/home/detail_makanan.dart';
 import 'package:save_n_serve/controllers/food_controller.dart';
+import 'package:save_n_serve/components/shared/food_image_slider.dart';
 
 class FoodCard extends StatefulWidget {
   final FoodItem item;
@@ -49,12 +50,7 @@ class _FoodCardState extends State<FoodCard> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(20),
                   ),
-                  child: Image.asset(
-                    widget.item.imagePath,
-                    height: 180,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                  child: FoodImageSlider(imageUrls: widget.item.imageUrls),
                 ),
 
                 // RATING BADGE
@@ -220,4 +216,5 @@ class _FoodCardState extends State<FoodCard> {
       ),
     );
   }
+
 }

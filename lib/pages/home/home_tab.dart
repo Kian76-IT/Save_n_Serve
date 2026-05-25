@@ -7,7 +7,12 @@ import 'package:save_n_serve/theme.dart';
 
 class MainPageBene extends StatefulWidget {
   final int initialIndex;
-  const MainPageBene({super.key, this.initialIndex = 0});
+  final int activityInitialTab;
+  const MainPageBene({
+    super.key,
+    this.initialIndex = 0,
+    this.activityInitialTab = 0,
+  });
 
   static MainPageBeneState? of(BuildContext context) {
     return context.findAncestorStateOfType<MainPageBeneState>();
@@ -19,19 +24,19 @@ class MainPageBene extends StatefulWidget {
 
 class MainPageBeneState extends State<MainPageBene> {
   late int _selectedIndex;
+  late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.initialIndex;
+    _pages = [
+      const HomeTab(),
+      const Watchlist(),
+      Activity(initialTab: widget.activityInitialTab),
+      const ProfilePage(),
+    ];
   }
-
-  final List<Widget> _pages = [
-    const HomeTab(),
-    const Watchlist(),
-    const Activity(),
-    const ProfilePage(),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {

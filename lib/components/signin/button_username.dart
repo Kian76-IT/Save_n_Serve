@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:save_n_serve/theme.dart';
 
 class ButtonUsername extends StatelessWidget {
-  const ButtonUsername({super.key});
+  // 1. Buka pintu buat nerima controller
+  final TextEditingController controller;
+
+  // 2. Wajibkan controller diisi saat widget dipanggil
+  const ButtonUsername({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 32, left: 5, right: 5),
       child: TextField(
+        // 3. Pasang controller ke TextField!
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Username or Email',
           hintStyle: AppTextStyle.regularPoppins20.copyWith(color: text),

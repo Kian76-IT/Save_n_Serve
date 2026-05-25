@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:save_n_serve/controllers/giver_controller.dart';
 import 'submit_success_page.dart';
 
@@ -39,11 +41,20 @@ class _DonationFormPageState extends State<DonationFormPage> {
       return;
     }
 
-    final success = await _controller.submitDonation();
-    if (success && mounted) {
+    final error = await _controller.submitDonation();
+    if (!mounted) return;
+
+    if (error == null) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const SubmitSuccessPage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -92,30 +103,8 @@ class _DonationFormPageState extends State<DonationFormPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // IMAGE BOX
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 90,
-                      height: 90,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey, style: BorderStyle.solid),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.camera_alt_outlined, size: 35, color: Colors.grey),
-                    ),
-                    const SizedBox(width: 16),
-                    const Text("Add up to 10 images", style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              ),
+              // ── IMAGE PICKER BOX ─────────────────────────────
+              _buildImagePicker(),
 
               const SizedBox(height: 16),
 
@@ -231,19 +220,8 @@ class _DonationFormPageState extends State<DonationFormPage> {
 
               const SizedBox(height: 16),
 
-              // MAP PLACEHOLDER
-              Container(
-                height: 140,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      "https://maps.gstatic.com/tactile/basepage/pegman_sherlock.png",
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              // GIMMICK MAP — static UI placeholder, no API key needed
+              _buildGimmickMap(),
 
               const SizedBox(height: 30),
 
@@ -272,6 +250,240 @@ class _DonationFormPageState extends State<DonationFormPage> {
               const SizedBox(height: 30),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    final images = _controller.pickedImages;
+    final canAddMore = images.length < 10;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                images.isEmpty
+                    ? 'Add up to 10 images'
+                    : '${images.length} / 10 photos selected',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+              if (canAddMore)
+                GestureDetector(
+                  onTap: _controller.pickImages,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.add_photo_alternate_outlined,
+                            color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text('Add Photos',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (images.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 90,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: images.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                itemBuilder: (context, i) => _buildThumbnail(images[i], i),
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: _controller.pickImages,
+              child: Container(
+                height: 80,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Colors.grey.shade300,
+                      style: BorderStyle.solid),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.camera_alt_outlined,
+                          size: 30, color: Colors.grey),
+                      SizedBox(height: 6),
+                      Text('Tap to pick photos',
+                          style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThumbnail(XFile image, int index) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.file(
+            File(image.path),
+            width: 90,
+            height: 90,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: () => _controller.removeImage(index),
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.65),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGimmickMap() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        height: 140,
+        child: Stack(
+          children: [
+            // Road grid background
+            Container(color: const Color(0xFFD4E9C7)),
+            // Horizontal road lines
+            for (int i = 0; i < 6; i++)
+              Positioned(
+                top: 15.0 + i * 22.0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: i == 2 ? 5 : 2,
+                  color: Colors.white.withValues(alpha: i == 2 ? 0.9 : 0.5),
+                ),
+              ),
+            // Vertical road lines
+            for (int i = 0; i < 9; i++)
+              Positioned(
+                left: 10.0 + i * 42.0,
+                top: 0,
+                bottom: 0,
+                child: Container(
+                  width: i == 3 ? 5 : 2,
+                  color: Colors.white.withValues(alpha: i == 3 ? 0.9 : 0.4),
+                ),
+              ),
+            // Decorative green blocks (park/building)
+            Positioned(
+              left: 50, top: 20,
+              child: Container(
+                width: 55, height: 35,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF81C784).withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 30, bottom: 20,
+              child: Container(
+                width: 48, height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF81C784).withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            // Grey building block
+            Positioned(
+              right: 90, top: 15,
+              child: Container(
+                width: 35, height: 28,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+            ),
+            // Center location pin
+            const Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.location_pin, color: Colors.red, size: 38),
+                  SizedBox(height: 2),
+                  Text(
+                    'Lokasi Pickup',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Map label chip
+            Positioned(
+              top: 8, right: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4)],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.map_outlined, size: 12, color: Colors.green),
+                    SizedBox(width: 4),
+                    Text('Map', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

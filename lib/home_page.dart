@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../components/home/giver_body.dart';
 import '../components/home/beneficiary_body.dart';
 import 'package:save_n_serve/controllers/food_controller.dart';
 import 'package:save_n_serve/controllers/home_controller.dart';
+import 'package:save_n_serve/controllers/notification_controller.dart';
 import 'package:save_n_serve/pages/home/home_tab.dart';
+import 'package:save_n_serve/pages/notifications/notifications_page.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -29,6 +30,7 @@ class _HomeTabState extends State<HomeTab> {
     super.initState();
     _bannerController = PageController();
     _startBannerTimer();
+    notificationController.fetchUnreadCount();
   }
 
   void _startBannerTimer() {
@@ -55,18 +57,15 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: ListenableBuilder(
-          listenable: homeController,
-          builder: (context, _) => SingleChildScrollView(
+        child: RefreshIndicator(
+          onRefresh: homeController.fetchFoods,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               children: [
                 _buildMovingBanner(),
                 const SizedBox(height: 16),
-
-                // SWITCHER LOGIC
-                homeController.selectedRole == 'Beneficiary'
-                    ? const BeneficiaryBody()
-                    : const GiverBody(),
+                const BeneficiaryBody(),
               ],
             ),
           ),
@@ -170,50 +169,85 @@ class _HomeTabState extends State<HomeTab> {
 
   Widget _buildRoleChip() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white30),
       ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: homeController.selectedRole,
-          dropdownColor: Colors.black87,
-          icon: const Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.white,
-            size: 18,
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.person, color: Colors.white, size: 13),
+          SizedBox(width: 5),
+          Text(
+            'Beneficiary',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-          ),
-          onChanged: (String? newValue) {
-            homeController.setRole(newValue!);
-          },
-          items: ['Beneficiary', 'Giver'].map((String value) {
-            return DropdownMenuItem<String>(value: value, child: Text(value));
-          }).toList(),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildNotificationBell() {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.15),
-        shape: BoxShape.circle,
-      ),
-      child: const Icon(
-        Icons.notifications_none,
-        color: Colors.white,
-        size: 20,
-      ),
+    return ListenableBuilder(
+      listenable: notificationController,
+      builder: (context, _) {
+        final count = notificationController.unreadCount;
+        return GestureDetector(
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const NotificationsPage()),
+          ),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_none,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              if (count > 0)
+                Positioned(
+                  top: -2,
+                  right: -2,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      count > 99 ? '99+' : '$count',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -9,8 +9,25 @@ import 'package:save_n_serve/components/signin/teks_or_signin.dart';
 import 'package:save_n_serve/components/signin/text_terms.dart';
 import 'package:save_n_serve/theme.dart';
 
-class SignIn extends StatelessWidget {
+class SignIn extends StatefulWidget {
   const SignIn({super.key});
+
+  @override
+  State<SignIn> createState() => _SignInState();
+}
+
+class _SignInState extends State<SignIn> {
+  // 1. KITA BIKIN MESIN PENANGKAP TEKS DI SINI
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  // Bersihkan memori kalau halaman ditutup
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,30 +50,30 @@ class SignIn extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    // toggle switch
                     const SizedBox(height: 40),
                     ButtonSwitch(),
 
-                    // username or email
                     const SizedBox(height: 20),
-                    ButtonUsername(),
+                    // 2. MASUKIN CONTROLLER KE DALAM KOLOM EMAIL
+                    ButtonUsername(controller: emailController),
 
-                    // Text Field Password
                     const SizedBox(height: 20),
-                    ButtonPassword(),
+                    // 3. MASUKIN CONTROLLER KE DALAM KOLOM PASSWORD
+                    ButtonPassword(controller: passwordController),
 
-                    // Buttong Login
                     const SizedBox(height: 20),
-                    ButtonLogin(),
+                    // 4. MASUKIN CONTROLLER KE DALAM TOMBOL LOGIN!
+                    ButtonLogin(
+                      emailController: emailController,
+                      passwordController: passwordController,
+                    ),
 
-                    // Teks Sign in with
                     const SizedBox(height: 34),
                     TeksOrSignin(),
 
-                    // social logini
                     const SizedBox(height: 14),
                     SocialLogin(),
-                    // Teks Terms of Service
+                    
                     const SizedBox(height: 100),
                     TextTerms(),
                   ],

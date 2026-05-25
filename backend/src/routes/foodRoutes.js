@@ -23,14 +23,15 @@ const router = express.Router();
 
 // Public — no auth needed
 router.get("/feed", feedQueryValidator, validationMiddleware, getFoodFeed);
-router.get("/:food_id", getFoodById);
 
-// Authenticated routes
+// Authenticated routes — /my MUST be registered before /:food_id to avoid shadowing
 router.get(
   "/my",
   authMiddleware,
   getMyFoods
 );
+
+router.get("/:food_id", getFoodById);
 
 // giver-only routes
 router.post(
