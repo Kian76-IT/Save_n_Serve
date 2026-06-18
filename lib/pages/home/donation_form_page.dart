@@ -59,6 +59,7 @@ class _DonationFormPageState extends State<DonationFormPage> {
     }
   }
 
+
   Future<void> _pickTime({required bool isStart}) async {
     final current = isStart ? _controller.startTime : _controller.endTime;
     final picked = await showTimePicker(
@@ -255,6 +256,14 @@ class _DonationFormPageState extends State<DonationFormPage> {
     );
   }
 
+  Future<void> _pickImagesAndCheck() async {
+    final before = _controller.pickedImages.length;
+    await _controller.pickImages();
+    if (_controller.pickedImages.length > before) {
+      _controller.runAiCheck();
+    }
+  }
+
   Widget _buildImagePicker() {
     final images = _controller.pickedImages;
     final canAddMore = images.length < 10;
@@ -283,7 +292,7 @@ class _DonationFormPageState extends State<DonationFormPage> {
               ),
               if (canAddMore)
                 GestureDetector(
-                  onTap: _controller.pickImages,
+                  onTap: _pickImagesAndCheck,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
@@ -314,14 +323,16 @@ class _DonationFormPageState extends State<DonationFormPage> {
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: images.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 10),
+                separatorBuilder: (context, i) => const SizedBox(width: 10),
                 itemBuilder: (context, i) => _buildThumbnail(images[i], i),
               ),
             ),
+            const SizedBox(height: 10),
+            _buildAiBadge(),
           ] else ...[
             const SizedBox(height: 12),
             GestureDetector(
-              onTap: _controller.pickImages,
+              onTap: _pickImagesAndCheck,
               child: Container(
                 height: 80,
                 decoration: BoxDecoration(
@@ -345,6 +356,64 @@ class _DonationFormPageState extends State<DonationFormPage> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAiBadge() {
+    if (_controller.isCheckingAi) {
+      return Row(
+        children: const [
+          SizedBox(
+            width: 14, height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
+          ),
+          SizedBox(width: 8),
+          Text('AI sedang menganalisis foto...', style: TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
+      );
+    }
+
+    final status = _controller.aiStatus;
+    if (status == null) return const SizedBox.shrink();
+
+    final isFresh = status == 'fresh';
+    final isRotten = status == 'rotten';
+
+    if (!isFresh && !isRotten) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: isFresh ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isFresh ? Colors.green.shade300 : Colors.orange.shade300,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isFresh ? Icons.check_circle_outline : Icons.warning_amber_rounded,
+            size: 15,
+            color: isFresh ? Colors.green : Colors.orange,
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              isFresh
+                  ? 'AI: Makanan terlihat segar'
+                  : 'AI: Terindikasi kurang segar — pastikan masih layak',
+              style: TextStyle(
+                fontSize: 12,
+                color: isFresh ? Colors.green.shade700 : Colors.orange.shade800,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
         ],
       ),
     );
