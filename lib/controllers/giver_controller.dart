@@ -44,11 +44,20 @@ class GiverController extends ChangeNotifier {
     final updated = List<XFile>.of(_pickedImages);
     updated.removeAt(index);
     _pickedImages = updated;
+    // Reset AI result when the first image (the one that was checked) is removed
+    if (index == 0) _aiStatus = null;
     notifyListeners();
   }
 
   bool _isSubmitting = false;
   bool get isSubmitting => _isSubmitting;
+
+  // null = belum dicek, "fresh", "rotten", "unknown" (error/timeout)
+  String? _aiStatus;
+  String? get aiStatus => _aiStatus;
+
+  bool _isCheckingAi = false;
+  bool get isCheckingAi => _isCheckingAi;
 
   void setStartTime(TimeOfDay t) {
     _startTime = t;
@@ -86,6 +95,50 @@ class GiverController extends ChangeNotifier {
     }
     if (_startTime == null || _endTime == null) return false;
     return !isTimeReversed();
+  }
+
+  String? getToken() => SessionService.token;
+
+  // Runs AI freshness check on the first picked image and stores the result
+  // in [aiStatus]. Called automatically after the user picks photos.
+  Future<void> runAiCheck() async {
+    if (_pickedImages.isEmpty) return;
+    final token = SessionService.token;
+    if (token == null) return;
+
+    _isCheckingAi = true;
+    _aiStatus = null;
+    notifyListeners();
+
+    try {
+      final uri = Uri.parse('${ApiConstants.baseUrl}/ai/check');
+      final request = http.MultipartRequest('POST', uri)
+        ..headers['Authorization'] = 'Bearer $token';
+      request.files.add(
+        await http.MultipartFile.fromPath('image', _pickedImages.first.path,
+            filename: _pickedImages.first.name),
+      );
+      final streamed = await request.send().timeout(const Duration(seconds: 15));
+      final response = await http.Response.fromStream(streamed);
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final status = body['status'] as String?;
+        _aiStatus = (status == 'fresh' || status == 'rotten') ? status : 'unknown';
+      } else {
+        _aiStatus = 'unknown';
+      }
+    } catch (_) {
+      _aiStatus = 'unknown';
+    }
+
+    _isCheckingAi = false;
+    notifyListeners();
+  }
+
+  // Legacy method kept for backwards compatibility — delegates to runAiCheck.
+  Future<String?> checkFirstImageFreshness(String token) async {
+    await runAiCheck();
+    return _aiStatus;
   }
 
   // Uploads picked images to the backend, returns a comma-separated URL string.
@@ -213,6 +266,8 @@ class GiverController extends ChangeNotifier {
     _endTime   = null;
     _selectedQuantity = 1;
     _pickedImages = [];
+    _aiStatus = null;
+    _isCheckingAi = false;
     notifyListeners();
   }
 
